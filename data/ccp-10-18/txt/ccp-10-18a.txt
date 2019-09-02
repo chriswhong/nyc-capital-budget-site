@@ -20989,11 +20989,11 @@
          841 BR10YR15   Waterway Bridges Ten Year Plan
                   CTGY    003 CONTINGENCY                                                  149          0    06/19
          850 HBQA70551  167th St. Ped Bridge Bin:7705510                                                              DEVSCOPE 06/18 06/19
-                  DSGN    001 DESIGN                                                       658          0    06/19
-                  SVCS    002 SERVICES                                                     329          0    06/19
-                  CONS    003 CONSTRUCTION                                               6,578          0    06/21
-                  CNSP    004 CONSTRUCTION SUPERVISION                                     987          0    06/21
-                  CONS TR 005 CONSTRUCTION                 TRACKS AND RAILS              2,777          0    06/21
+                  DSGN    01  DESIGN                                                       658          0    06/19
+                  SVCS    02  SERVICES                                                     329          0    06/19
+                  CONS    03  CONSTRUCTION                                               6,578          0    06/21
+                  CNSP    04  CONSTRUCTION SUPERVISION                                     987          0    06/21
+                  CONS TR 05  CONSTRUCTION                 TRACKS AND RAILS              2,777          0    06/21
          ------------------------------------------------------------------------------------------------------------------------------------
                                                          FY 2019 AUTHORIZED COMMITMENT PLAN                                      PAGE:  314
                                                       WITH FY 2019 PLAN AND FORECAST AND ACTUALS
