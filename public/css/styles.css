@@ -1,0 +1,31 @@
+.title-heading {
+  color: #808080;
+  font-weight: 700;
+}
+
+.project-title-heading {
+  color: #808080;
+  font-weight: 700;
+}
+
+.summary-info {
+  display: inline-block;
+  margin-right: 15px;
+}
+
+.total-container h6 {
+  font-size: 0.6rem;
+}
+
+.big-money {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+a > .card {
+  color: #000;
+}
+
+a > .card:hover {
+  background-color: #eee;
+}

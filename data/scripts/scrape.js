@@ -3,6 +3,11 @@ const readline = require('readline')
 
 const inputDir = process.argv[2]
 
+// TODO: pass this in as an argument
+// capital commitment plans show 4 years of appropriations & commitments, this will be
+// used as the starting year in the adoptedAppropriations and planCommitments
+const startingFy = 19
+
 const formatCost = (rawCost) => {
   let negative = false
   if (rawCost.includes('-')) negative = true
@@ -27,31 +32,6 @@ const parseBudgetLineHeaders = (line) => {
 }
 
 const parseLine = (line, budgetLine) => {
-  // const closeCapitalProject = () => {
-  //   // add the array of commitmentdetails to the current project
-  //   capitalProjectObject.commitmentDetails = commitmentDetails
-  //   commitmentDetails = [] // reset
-  //
-  //   // if the capital project exists, push it to the capitalProjects array
-  //   capitalProjectObject.id && capitalProjects.push(capitalProjectObject)
-  //   capitalProjectObject = {} // reset
-  // }
-
-  // // wrap up all running values and output a complete budgetLineItem
-  // const closeBudgetLineObject = () => {
-  //   // close up the last project
-  //   closeCapitalProject()
-  //
-  //   budgetLineObject.projects = capitalProjects
-  //   // console.log('Complete Budget Line', JSON.stringify(budgetLineObject, null, 2))
-  //   output.write(`${i > 0 ? ',' : ''}${JSON.stringify(budgetLineObject, null, 2)}`)
-  //
-  //   i += 1
-  //   // reset all the things
-  //   budgetLineObject = null
-  //   capitalProjects = []
-  //   commitmentDetails = []
-  // }
   // check for patterns of new budget line, new project, or commitment
   if (/BUDGET LINE/.test(line)) { // new budget line
     budgetLine.budgetLineId = line.match(/BUDGET LINE:(.*)FMS/)[1].trim()
@@ -90,46 +70,54 @@ const parseLine = (line, budgetLine) => {
   } else if (/ADOPTED/.test(line)) {
     if (budgetLine.budgetLineId && !budgetLine.adoptedAppropriations) { // only log values if following a budget line heading (exclude totals)
       const [,
-        adoptedFY19City,
-        adoptedFY20City,
-        adoptedFY21City,
-        adoptedFY22City,
+        adoptedFY0City,
+        adoptedFY1City,
+        adoptedFY2City,
+        adoptedFY3City,
         ,
-        commitmentFY19City,
-        commitmentFY20City,
-        commitmentFY21City,
-        commitmentFY22City
+        commitmentFY0City,
+        commitmentFY1City,
+        commitmentFY2City,
+        commitmentFY3City
       ] = line.split('*')
 
-      budgetLine.adoptedAppropriations = {
-        fy19: {
-          city: formatCost(adoptedFY19City)
+      budgetLine.adoptedAppropriations = [
+        {
+          period: `fy${startingFy}`,
+          city: formatCost(adoptedFY0City)
         },
-        fy20: {
-          city: formatCost(adoptedFY20City)
+        {
+          period: `fy${startingFy + 1}`,
+          city: formatCost(adoptedFY1City)
         },
-        fy21: {
-          city: formatCost(adoptedFY21City)
+        {
+          period: `fy${startingFy + 2}`,
+          city: formatCost(adoptedFY2City)
         },
-        fy22: {
-          city: formatCost(adoptedFY22City)
+        {
+          period: `fy${startingFy + 3}`,
+          city: formatCost(adoptedFY3City)
         }
-      }
+      ]
 
-      budgetLine.commitmentPlan = {
-        fy19: {
-          city: formatCost(commitmentFY19City)
+      budgetLine.commitmentPlan = [
+        {
+          period: `fy${startingFy}`,
+          city: formatCost(commitmentFY0City)
         },
-        fy20: {
-          city: formatCost(commitmentFY20City)
+        {
+          period: `fy${startingFy + 1}`,
+          city: formatCost(commitmentFY1City)
         },
-        fy21: {
-          city: formatCost(commitmentFY21City)
+        {
+          period: `fy${startingFy + 2}`,
+          city: formatCost(commitmentFY2City)
         },
-        fy22: {
-          city: formatCost(commitmentFY22City)
+        {
+          period: `fy${startingFy + 3}`,
+          city: formatCost(commitmentFY3City)
         }
-      }
+      ]
     }
   } else if (/^\s*\(N\)*/.test(line)) {
     const [,
@@ -145,15 +133,16 @@ const parseLine = (line, budgetLine) => {
     ] = line.split('*')
 
     const { adoptedAppropriations, commitmentPlan } = budgetLine
-    adoptedAppropriations.fy19.nonCity = formatCost(adoptedFY19NonCity)
-    adoptedAppropriations.fy20.nonCity = formatCost(adoptedFY20NonCity)
-    adoptedAppropriations.fy21.nonCity = formatCost(adoptedFY21NonCity)
-    adoptedAppropriations.fy22.nonCity = formatCost(adoptedFY22NonCity)
 
-    commitmentPlan.fy19.nonCity = formatCost(commitmentFY19NonCity)
-    commitmentPlan.fy20.nonCity = formatCost(commitmentFY20NonCity)
-    commitmentPlan.fy21.nonCity = formatCost(commitmentFY21NonCity)
-    commitmentPlan.fy22.nonCity = formatCost(commitmentFY22NonCity)
+    adoptedAppropriations[0].nonCity = formatCost(adoptedFY19NonCity)
+    adoptedAppropriations[1].nonCity = formatCost(adoptedFY20NonCity)
+    adoptedAppropriations[2].nonCity = formatCost(adoptedFY21NonCity)
+    adoptedAppropriations[3].nonCity = formatCost(adoptedFY22NonCity)
+
+    commitmentPlan[0].nonCity = formatCost(commitmentFY19NonCity)
+    commitmentPlan[1].nonCity = formatCost(commitmentFY20NonCity)
+    commitmentPlan[2].nonCity = formatCost(commitmentFY21NonCity)
+    commitmentPlan[3].nonCity = formatCost(commitmentFY22NonCity)
   } else if (/^\s*\d{3}\s/.test(line)) { // beginning of new capital project
     if (budgetLine.budgetLineId) {
       const project = budgetLine.projects[budgetLine.projects.length - 1]
@@ -202,7 +191,7 @@ const parseLine = (line, budgetLine) => {
 const parseTxtFile = (inputDir, file) => {
   console.log(inputDir, file)
   // create an output file, add open array bracket
-  const outputPath = `../data/ccp-10-18/json/${file.split('.')[0]}.json`
+  const outputPath = `${inputDir}/../json/${file.split('.')[0]}.json`
   fs.ensureFileSync(outputPath)
   const output = fs.createWriteStream(outputPath)
   output.write('[\n')

@@ -1,0 +1,174 @@
+[
+  {
+    "type": "AG",
+    "description": "Aging"
+  },
+  {
+    "type": "BR",
+    "description": "Waterway Bridges"
+  },
+  {
+    "type": "C",
+    "description": "Correction"
+  },
+  {
+    "type": "CO",
+    "description": "Courts"
+  },
+  {
+    "type": "CS",
+    "description": "Children’s Services"
+  },
+  {
+    "type": "DP",
+    "description": "Dept. of Information Technology & Telecomm."
+  },
+  {
+    "type": "E",
+    "description": "Education"
+  },
+  {
+    "type": "ED",
+    "description": "Economic Development"
+  },
+  {
+    "type": "EP",
+    "description": "Environmental Protection - Equipment"
+  },
+  {
+    "type": "F",
+    "description": "Fire Department"
+  },
+  {
+    "type": "FA",
+    "description": "Ferries and Aviation"
+  },
+  {
+    "type": "GE",
+    "description": "Gas and Electric"
+  },
+  {
+    "type": "HA",
+    "description": "Housing Authority"
+  },
+  {
+    "type": "HB",
+    "description": "Highway Bridges"
+  },
+  {
+    "type": "HD",
+    "description": "Housing Preservation and Development"
+  },
+  {
+    "type": "HH",
+    "description": "Homeless Services"
+  },
+  {
+    "type": "HL",
+    "description": "Health and Mental Hygiene"
+  },
+  {
+    "type": "HN",
+    "description": "City University of New York"
+  },
+  {
+    "type": "HO",
+    "description": "Health and Hospitals Corporation"
+  },
+  {
+    "type": "HR",
+    "description": "Human Resources"
+  },
+  {
+    "type": "HW",
+    "description": "Highways"
+  },
+  {
+    "type": "JJ",
+    "description": "Juvenile Justice"
+  },
+  {
+    "type": "L",
+    "description": "New York Research Library"
+  },
+  {
+    "type": "LB",
+    "description": "Brooklyn Public Library"
+  },
+  {
+    "type": "LN",
+    "description": "New York Public Library"
+  },
+  {
+    "type": "LQ",
+    "description": "Queens Borough Public Library"
+  },
+  {
+    "type": "MT",
+    "description": "MTA Bus Company"
+  },
+  {
+    "type": "P",
+    "description": "Parks and Recreation"
+  },
+  {
+    "type": "PO",
+    "description": "Police"
+  },
+  {
+    "type": "PT",
+    "description": "Ports, International Trade and Commerce"
+  },
+  {
+    "type": "PU",
+    "description": "EDP Equipment and Finance Costs"
+  },
+  {
+    "type": "PV",
+    "description": "Cultural Affairs"
+  },
+  {
+    "type": "PW",
+    "description": "Public Buildings"
+  },
+  {
+    "type": "RE",
+    "description": "Real Property"
+  },
+  {
+    "type": "S",
+    "description": "Sanitation"
+  },
+  {
+    "type": "SE",
+    "description": "Sewers"
+  },
+  {
+    "type": "T",
+    "description": "Transit Authority"
+  },
+  {
+    "type": "TD",
+    "description": "Transportation - Equipment"
+  },
+  {
+    "type": "TF",
+    "description": "Traffic"
+  },
+  {
+    "type": "W",
+    "description": "Water Supply"
+  },
+  {
+    "type": "WM",
+    "description": "Water Mains, Sources and Treatment"
+  },
+  {
+    "type": "WN",
+    "description": "Municipal Broadcasting"
+  },
+  {
+    "type": "WP",
+    "description": "Water Pollution Control"
+  }
+]
