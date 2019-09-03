@@ -26,6 +26,14 @@ a > .card {
   color: #000;
 }
 
+a:hover {
+  text-decoration: none;
+}
+
 a > .card:hover {
   background-color: #eee;
+}
+
+.commitments-table-container {
+  overflow-x: scroll;
 }

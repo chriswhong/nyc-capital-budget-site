@@ -1,7 +1,7 @@
 const numeral = require('numeral')
 const agencies = require('./agencies')
 
-const formatMoney = (amount) => numeral(amount).format('($ 0.00 a)').toUpperCase()
+const formatMoney = (amount) => numeral(amount).format('($ 0.0 a)').toUpperCase()
 
 const toTitleCase = (str) => {
   return str.replace(
@@ -17,7 +17,8 @@ const formatTableValue = (value) => {
 }
 
 const agencyLookup = (code) => {
-  return agencies.find(d => d.code === code).agency
+  const match = agencies.find(d => d.code === code)
+  return match ? match.agency : 'Unknown'
 }
 
 module.exports = {

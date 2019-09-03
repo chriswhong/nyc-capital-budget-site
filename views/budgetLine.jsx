@@ -27,47 +27,49 @@ const HelloMessage = (props) => {
       description,
       commitments
     } = project
+    console.log(project)
 
     return (
-      <div key='id' className='card mb-3'>
+      <div key='id' className='card mb-3 capital-project-card'>
         <div className="card-body">
           <p className='project-title-heading mb-1'>Project Id: {id}</p>
           <h4>{description}</h4>
-
           <p>Managed By: {agencyLookup(managingAgency)}</p>
           <h5>Commitments</h5>
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope="col">Category</th>
-                <th scope="col">Subcategory</th>
-                <th scope="col">Total Cost</th>
-                <th scope="col">City Cost</th>
-                <th scope="col">Non-city Cost</th>
-                <th scope="col">Planned Start</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                commitments.map(({
-                  code,
-                  categoryDescription,
-                  subcategoryDescription,
-                  cost,
-                  planCommDate
-                }) => (
-                  <tr>
-                    <td>{categoryDescription}</td>
-                    <td>{subcategoryDescription || 'N/A'}</td>
-                    <td>{formatMoney(cost.city + cost.nonCity)}</td>
-                    <td>{formatMoney(cost.city)}</td>
-                    <td>{formatMoney(cost.nonCity)}</td>
-                    <td>{planCommDate}</td>
-                  </tr>
-                ))
-              }
-            </tbody>
-          </table>
+          <div className='commitments-table-container'>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">Category</th>
+                  <th scope="col">Subcategory</th>
+                  <th scope="col">Total Cost</th>
+                  <th scope="col">City Cost</th>
+                  <th scope="col">Non-city Cost</th>
+                  <th scope="col">Planned Start</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  commitments.map(({
+                    code,
+                    categoryDescription,
+                    subcategoryDescription,
+                    cost,
+                    planCommDate
+                  }) => (
+                    <tr>
+                      <td>{categoryDescription}</td>
+                      <td>{subcategoryDescription || 'N/A'}</td>
+                      <td>{formatMoney(cost.city + cost.nonCity)}</td>
+                      <td>{formatMoney(cost.city)}</td>
+                      <td>{formatMoney(cost.nonCity)}</td>
+                      <td>{planCommDate}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     )
