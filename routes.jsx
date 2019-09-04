@@ -132,8 +132,66 @@ router.get('/budgetlines', async (req, res, next) => {
 
 router.get('/budgetlines/:budgetlineid/:description', async (req, res, next) => {
   try {
-    const budgetLine = await BudgetLine.findOne({ budgetLineId: req.params.budgetlineid })
-    res.render('budgetLine', { title: 'budget Line', budgetLine })
+    const [budgetLine] = await BudgetLine.aggregate([
+      {
+        $project: {
+          budgetLineId: '$budgetLineId',
+          fmsNumber: '$fmsNumber',
+          description: '$description',
+          availableBalance: '$availableBalance',
+          contractLiability: '$contractLiability',
+          itdExpenditures: '$itdExpenditures',
+          adoptedAppropriations: '$adoptedAppropriations',
+          commitmentPlan: '$commitmentPlan',
+          projects: {
+            $map: {
+              input: '$projects',
+              in: {
+                managingAgency: '$$this.managingAgency',
+                id: '$$this.id',
+                description: '$$this.description',
+                commitmentCount: { $size: '$$this.commitments' },
+                totalCommitments: {
+                  $reduce: {
+                    input: {
+                      $map: {
+                        input: '$$this.commitments',
+                        in: { $sum: ['$$this.cost.city', '$$this.cost.nonCity'] }
+                      }
+                    },
+                    initialValue: 0,
+                    in: { $add: ['$$value', '$$this'] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          budgetLineId: req.params.budgetlineid
+        }
+      }
+    ])
+
+    res.render('budgetLine', { title: 'budget Line', budgetLine: budgetLine })
+  } catch (err) { next(err) }
+})
+
+router.get('/projects/:projectid/:description', async (req, res, next) => {
+  try {
+    const { projects } = await BudgetLine.findOne({
+      projects: {
+        $elemMatch: {
+          id: req.params.projectid.toUpperCase()
+        }
+      }
+    })
+
+    const project = projects.find(d => d.id.toLowerCase() === req.params.projectid)
+    console.log(project)
+    res.render('project', { title: 'budget Line', project })
   } catch (err) { next(err) }
 })
 

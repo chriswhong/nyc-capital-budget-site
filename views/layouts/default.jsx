@@ -11,6 +11,9 @@ class DefaultLayout extends React.Component {
           <link rel='stylesheet' href='/css/styles.css' />
         </head>
         <body>
+          <nav className='navbar navbar-dark bg-dark'>
+            <a className='navbar-brand' href='#'>NYC Capital Budget</a>
+          </nav>
           {this.props.children}
         </body>
       </html>

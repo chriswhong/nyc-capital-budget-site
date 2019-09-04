@@ -6,7 +6,7 @@ const inputDir = process.argv[2]
 // TODO: pass this in as an argument
 // capital commitment plans show 4 years of appropriations & commitments, this will be
 // used as the starting year in the adoptedAppropriations and planCommitments
-const startingFy = 19
+const startingFy = 18
 
 const formatCost = (rawCost) => {
   let negative = false

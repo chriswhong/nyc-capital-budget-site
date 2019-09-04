@@ -11,7 +11,7 @@ Use `sh pdf-to-text.sh ../ccp-10-18/pdf` to process a whole directory of pdfs, w
 
 run  `node scrape ../ccp-10-18/txt`
 
-There seems to be an anomaly on the last page of the pdf where the 3-digit number next to a commit `001` is only two digits.  The leading zero was filled in manually to make sure this data was included in the output.
+There seems to be an anomaly on the last page of the FY19 pdf where the 3-digit number next to a commit `001` is only two digits.  The leading zero was filled in manually to make sure this data was included in the output.
 
 
 Import to DB
