@@ -129,7 +129,7 @@ router.get('/:fy/type/:type/:description', async (req, res, next) => {
       { $sort: { totalCommitments: -1 } }
     ])
 
-    res.render('projecttype', {
+    res.render('type', {
       title: 'Project Types',
       budgetLines,
       type,
