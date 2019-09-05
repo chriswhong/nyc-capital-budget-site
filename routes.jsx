@@ -1,5 +1,5 @@
 const express = require('express')
-const BudgetLine = require('./models/budgetLine')
+const { generateSchema } = require('./models/budgetLine')
 const router = express.Router()
 const types = require('./utils/types')
 
@@ -8,8 +8,18 @@ const lookupType = (type) => {
   return types.find(d => d.type === upperCaseType).description
 }
 
-router.get('/', async (req, res, next) => {
+const schemaMap = {
+  fy19: generateSchema('ccp-10-18')
+}
+
+router.get('/', (req, res) => {
+  res.redirect('/fy19')
+})
+
+router.get('/:fy', async (req, res, next) => {
+  const { fy } = req.params
   try {
+    const BudgetLine = schemaMap[fy]
     let budgetTypes = await BudgetLine.aggregate([
       {
         $project: {
@@ -63,14 +73,19 @@ router.get('/', async (req, res, next) => {
         ...budgetType
       }
     })
-    res.render('index', { title: 'Capital Commitments', budgetTypes })
+    res.render('index', {
+      title: `NYC ${fy.toUpperCase()} Capital Commitment Plan`,
+      budgetTypes,
+      fy
+    })
   } catch (err) { next(err) }
 })
 
 // list all budgetlines for a type
-router.get('/types/:type/:description', async (req, res, next) => {
-  const { type } = req.params
+router.get('/:fy/type/:type/:description', async (req, res, next) => {
+  const { fy, type } = req.params
   try {
+    const BudgetLine = schemaMap[fy]
     const budgetLines = await BudgetLine.aggregate([
       {
         $project: {
@@ -107,17 +122,19 @@ router.get('/types/:type/:description', async (req, res, next) => {
       {
         $match: {
           budgetLineId: {
-            $regex: new RegExp(`^${type.toUpperCase()}`)
+            $regex: new RegExp(`^${type.toUpperCase()}-`)
           }
         }
       },
       { $sort: { totalCommitments: -1 } }
     ])
 
-    res.render('budgetLines', {
-      title: 'budget Lines',
+    res.render('projecttype', {
+      title: 'Project Types',
       budgetLines,
-      type: lookupType(type)
+      type,
+      typeDisplay: lookupType(type),
+      fy
     })
   } catch (err) { next(err) }
 })
@@ -125,14 +142,17 @@ router.get('/types/:type/:description', async (req, res, next) => {
 // list all budgetlines
 router.get('/budgetlines', async (req, res, next) => {
   try {
+    const BudgetLine = schemaMap[req.params.fy]
     const budgetLines = await BudgetLine.find({}).select('budgetLineId description')
     res.render('budgetLines', { title: 'budget Lines', budgetLines })
   } catch (err) { next(err) }
 })
 
-router.get('/budgetlines/:budgetlineid/:description', async (req, res, next) => {
+router.get('/:fy/type/:type/budgetline/:budgetlineid/:description', async (req, res, next) => {
+  const { fy, type, budgetlineid } = req.params
   try {
-    const [budgetLine] = await BudgetLine.aggregate([
+    const BudgetLine = schemaMap[fy]
+    const [data] = await BudgetLine.aggregate([
       {
         $project: {
           budgetLineId: '$budgetLineId',
@@ -170,17 +190,24 @@ router.get('/budgetlines/:budgetlineid/:description', async (req, res, next) => 
       },
       {
         $match: {
-          budgetLineId: req.params.budgetlineid
+          budgetLineId: budgetlineid.toUpperCase()
         }
       }
     ])
 
-    res.render('budgetLine', { title: 'budget Line', budgetLine: budgetLine })
+    res.render('budgetline', {
+      title: 'budget Line',
+      data,
+      fy,
+      type
+    })
   } catch (err) { next(err) }
 })
 
-router.get('/projects/:projectid/:description', async (req, res, next) => {
+router.get('/:fy/type/:type/budgetline/:budgetlineid/project/:projectid/:description', async (req, res, next) => {
+  const { fy, type, projectid } = req.params
   try {
+    const BudgetLine = schemaMap[fy]
     const { projects } = await BudgetLine.findOne({
       projects: {
         $elemMatch: {
@@ -189,9 +216,13 @@ router.get('/projects/:projectid/:description', async (req, res, next) => {
       }
     })
 
-    const project = projects.find(d => d.id.toLowerCase() === req.params.projectid)
-    console.log(project)
-    res.render('project', { title: 'budget Line', project })
+    const project = projects.find(d => d.id.toLowerCase() === projectid)
+    res.render('project', {
+      title: 'budget Line',
+      project,
+      fy,
+      type
+    })
   } catch (err) { next(err) }
 })
 

@@ -9,7 +9,13 @@ const {
   formatTableValue
 } = require('../utils/helpers')
 
-const HelloMessage = (props) => {
+const BudgetLine = (props) => {
+  const {
+    fy,
+    type,
+    data
+  } = props
+
   const {
     budgetLineId,
     fmsNumber,
@@ -20,7 +26,7 @@ const HelloMessage = (props) => {
     projects,
     adoptedAppropriations,
     commitmentPlan
-  } = props.budgetLine
+  } = data
 
   const projectList = projects.map((project) => {
     const {
@@ -32,11 +38,11 @@ const HelloMessage = (props) => {
     } = project
 
     return (
-      <a key={id} className='text-decoration-none' href={`/projects/${id.toLowerCase()}/${slugify(description, { lower: true })}`}>
+      <a key={id} className='text-decoration-none' href={`/${fy}/type/${type}/budgetline/${budgetLineId.toLowerCase()}/project/${id.toLowerCase()}/${slugify(description, { lower: true })}`}>
         <div className='card mb-3 capital-project-card'>
-          <div className="card-body">
+          <div className='card-body'>
             <p className='project-title-heading mb-1'>Project Id: {id}</p>
-            <h4>{description}</h4>
+            <h5>{description}</h5>
             <p>Managed By: {agencyLookup(managingAgency)}</p>
             <p>Commitments: {commitmentCount}</p>
             <p>Total FY19-FY22: {formatMoney(totalCommitments)}</p>
@@ -59,9 +65,9 @@ const HelloMessage = (props) => {
         <div className='row'>
           <div className='col-12 col-md-4 mb-4'>
             <div className='card'>
-              <div className="card-body">
-                <h5 className="card-title">Available Balance</h5>
-                <div className="card-text">
+              <div className='card-body'>
+                <h5 className='card-title'>Available Balance</h5>
+                <div className='card-text'>
                   <h1 className='mb-3'>{formatMoney(availableBalance.city + availableBalance.nonCity)}</h1>
                   <p className='mb-0'>City funds: {formatMoney(availableBalance.city)}</p>
                   <p className='mb-0'>Non-city funds: {formatMoney(availableBalance.nonCity)}</p>
@@ -71,9 +77,9 @@ const HelloMessage = (props) => {
           </div>
           <div className='col-12 col-md-4 mb-4'>
             <div className='card'>
-              <div className="card-body">
-                <h5 className="card-title">Contract Liability</h5>
-                <div className="card-text">
+              <div className='card-body'>
+                <h5 className='card-title'>Contract Liability</h5>
+                <div className='card-text'>
                   <h1 className='mb-3'>{formatMoney(contractLiability.city + contractLiability.nonCity)}</h1>
                   <p className='mb-0'>City funds: {formatMoney(contractLiability.city)}</p>
                   <p className='mb-0'>Non-city funds: {formatMoney(contractLiability.nonCity)}</p>
@@ -84,9 +90,9 @@ const HelloMessage = (props) => {
 
           <div className='col-12 col-md-4 mb-4'>
             <div className='card'>
-              <div className="card-body">
-                <h5 className="card-title">Itd Expenditures</h5>
-                <div className="card-text">
+              <div className='card-body'>
+                <h5 className='card-title'>Itd Expenditures</h5>
+                <div className='card-text'>
                   <h1 className='mb-3'>{formatMoney(itdExpenditures.city + itdExpenditures.nonCity)}</h1>
                   <p className='mb-0'>City funds: {formatMoney(itdExpenditures.city)}</p>
                   <p className='mb-0'>Non-city funds: {formatMoney(itdExpenditures.nonCity)}</p>
@@ -99,16 +105,16 @@ const HelloMessage = (props) => {
         <div className='row'>
           <div className='col-12 col-md-6 mb-4'>
             <div className='card'>
-              <div className="card-body">
-                <h5 className="card-title">Adopted Appropriations</h5>
-                <table className="table">
+              <div className='card-body'>
+                <h5 className='card-title'>Adopted Appropriations</h5>
+                <table className='table'>
                   <thead>
                     <tr>
-                      <th scope="col"></th>
-                      <th scope="col">FY19</th>
-                      <th scope="col">FY20</th>
-                      <th scope="col">FY21</th>
-                      <th scope="col">FY22</th>
+                      <th scope='col' />
+                      <th scope='col'>FY19</th>
+                      <th scope='col'>FY20</th>
+                      <th scope='col'>FY21</th>
+                      <th scope='col'>FY22</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -140,16 +146,16 @@ const HelloMessage = (props) => {
           </div>
           <div className='col-12 col-md-6 mb-4'>
             <div className='card'>
-              <div className="card-body">
-                <h5 className="card-title">Planned Commitments</h5>
-                <table className="table">
+              <div className='card-body'>
+                <h5 className='card-title'>Planned Commitments</h5>
+                <table className='table'>
                   <thead>
                     <tr>
-                      <th scope="col"></th>
-                      <th scope="col">FY19</th>
-                      <th scope="col">FY20</th>
-                      <th scope="col">FY21</th>
-                      <th scope="col">FY22</th>
+                      <th scope='col' />
+                      <th scope='col'>FY19</th>
+                      <th scope='col'>FY20</th>
+                      <th scope='col'>FY21</th>
+                      <th scope='col'>FY22</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -180,9 +186,11 @@ const HelloMessage = (props) => {
             </div>
           </div>
         </div>
-        <div className='col-12'>
-          <h2>Capital Projects</h2>
-          {projectList}
+        <div className='row'>
+          <div className='col-12'>
+            <h2>Capital Projects</h2>
+            {projectList}
+          </div>
         </div>
       </div>
 
@@ -190,4 +198,4 @@ const HelloMessage = (props) => {
   )
 }
 
-module.exports = HelloMessage
+module.exports = BudgetLine

@@ -7,23 +7,23 @@ const {
   toTitleCase
 } = require('../utils/helpers')
 
-const HelloMessage = (props) => {
-  const { budgetLines } = props
+const ProjectType = (props) => {
+  const { budgetLines, fy, type, typeDisplay } = props
   return (
     <DefaultLayout title={props.title}>
       <div className='container mt-4'>
         <div className='row'>
           <div className='col-12'>
-            <h2>Budget Lines for type {props.type}</h2>
+            <h2>Budget Lines for type {typeDisplay}</h2>
           </div>
           <div className='col-12'>
             {
               budgetLines.map((budgetLine) => {
                 const { budgetLineId, fmsNumber, description, totalAppropriations, totalCommitments } = budgetLine
                 return (
-                  <a href={`/budgetLines/${budgetLineId}/${slugify(description, { lower: true })}`}>
+                  <a key={budgetLineId} href={`/${fy}/type/${type}/budgetline/${budgetLineId.toLowerCase()}/${slugify(description, { lower: true })}`}>
                     <div key={budgetLineId} className='card mb-3'>
-                      <div className="card-body">
+                      <div className='card-body'>
                         <div className='title-heading'>Budget Line {budgetLineId}</div>
                         <div className='title-heading'>FMS Number {fmsNumber}</div>
                         <h3 className='mb-4'>{toTitleCase(description)}</h3>
@@ -54,4 +54,4 @@ const HelloMessage = (props) => {
   )
 }
 
-module.exports = HelloMessage
+module.exports = ProjectType

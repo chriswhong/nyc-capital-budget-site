@@ -5,19 +5,19 @@ const {
   formatMoney
 } = require('../utils/helpers')
 
-const HelloMessage = (props) => {
-  const { budgetTypes } = props
+const Index = (props) => {
+  const { budgetTypes, fy } = props
 
   return (
     <DefaultLayout title={props.title}>
       <div className='container mt-4'>
         <div className='row'>
           <div className='col-12'>
-            <div className="jumbotron">
-              <h1 className="display-4">Explore the NYC Capital Commitment Plan</h1>
-              <p className="lead">This is a civic tech project that seeks to demystify the New York City Capital Budget.  The Capital Commitment plan is a PDF document that outlines the how the city plans to spend capital money over the next 4 years.</p>
-              <p className="lead">All data are from the <a href='https://www1.nyc.gov/site/omb/publications/fy19-accp.page'>FY 2019 Adopted Capital Commitment Plan</a></p>
-              <hr className="my-4" />
+            <div className='jumbotron'>
+              <h1 className='display-4'>Explore the NYC Capital Commitment Plan</h1>
+              <p className='lead'>This is a civic tech project that seeks to demystify the New York City Capital Budget.  The Capital Commitment plan is a PDF document that outlines the how the city plans to spend capital money over the next 4 years.</p>
+              <p className='lead'>All data are from the <a href='https://www1.nyc.gov/site/omb/publications/fy19-accp.page'>FY 2019 Adopted Capital Commitment Plan</a></p>
+              <hr className='my-4' />
               <p>Click on a project type below to explore its associated budget lines and projects.</p>
             </div>
           </div>
@@ -35,13 +35,13 @@ const HelloMessage = (props) => {
               } = budgetType
               return (
                 <div key={_id} className='col-md-6'>
-                  <a className='text-decoration-none' href={`/types/${_id.toLowerCase()}/${slugify(description, { lower: true })}`}>
+                  <a className='text-decoration-none' href={`/${fy}/type/${_id.toLowerCase()}/${slugify(description, { lower: true })}`}>
                     <div className='card mb-4'>
                       <div className='card-body'>
-                        <h4 className="card-title">{description}</h4>
+                        <h4 className='card-title'>{description}</h4>
                         <div className='mb-3'>
-                          <div className='summary-info'><span className="badge badge-pill badge-secondary">{budgetLines}</span> budget lines</div>
-                          <div className='summary-info'><span className="badge badge-pill badge-secondary">{projects}</span> projects</div>
+                          <div className='summary-info'><span className='badge badge-pill badge-secondary'>{budgetLines}</span> budget lines</div>
+                          <div className='summary-info'><span className='badge badge-pill badge-secondary'>{projects}</span> projects</div>
                         </div>
                         <div className='row'>
                           <div className='col-6'>
@@ -71,4 +71,4 @@ const HelloMessage = (props) => {
   )
 }
 
-module.exports = HelloMessage
+module.exports = Index

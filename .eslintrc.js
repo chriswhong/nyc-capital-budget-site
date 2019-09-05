@@ -5,7 +5,8 @@ module.exports = {
     node: true
   },
   extends: [
-    'standard'
+    'standard',
+    'standard-react'
   ],
   globals: {
     Atomics: 'readonly',
@@ -15,5 +16,6 @@ module.exports = {
     ecmaVersion: 2018
   },
   rules: {
+    'react/prop-types': 'off'
   }
 }
