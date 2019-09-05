@@ -144,7 +144,7 @@ router.get('/budgetlines', async (req, res, next) => {
   try {
     const BudgetLine = schemaMap[req.params.fy]
     const budgetLines = await BudgetLine.find({}).select('budgetLineId description')
-    res.render('budgetLines', { title: 'budget Lines', budgetLines })
+    res.render('budgetlines', { title: 'budget Lines', budgetLines })
   } catch (err) { next(err) }
 })
 
@@ -195,7 +195,7 @@ router.get('/:fy/type/:type/budgetline/:budgetlineid/:description', async (req, 
       }
     ])
 
-    res.render('budgetline', {
+    res.render('budgetlines', {
       title: 'budget Line',
       data,
       fy,
