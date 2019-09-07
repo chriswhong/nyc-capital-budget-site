@@ -13,8 +13,18 @@ class DefaultLayout extends React.Component {
         <body>
           <nav className='navbar navbar-dark bg-dark'>
             <a className='navbar-brand' href='#'>NYC Capital Commitments</a>
+            <form className='form-inline my-2 my-lg-0'>
+              <input className='form-control mr-sm-2 search' type='search' placeholder='Search' aria-label='Search' />
+            </form>
           </nav>
+          <div className='search-results' />
           {this.props.children}
+          <script
+            src='https://code.jquery.com/jquery-3.4.1.min.js'
+            integrity='sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo='
+            crossOrigin='anonymous'
+          />
+          <script src='/js/search.js' />
         </body>
       </html>
     )

@@ -37,3 +37,31 @@ a > .card:hover {
 .commitments-table-container {
   overflow-x: scroll;
 }
+
+.search-results {
+  position: absolute;
+  z-index: 10;
+  right: 24px;
+  top: 46px;
+  min-width: 500px;
+}
+
+.section-header {
+  background-color: #e2e2e2;
+  padding: .2rem 1.25rem;
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.result-id {
+  font-weight: 600;
+  font-size: 0.8rem;
+  margin-right: 12px;
+  display: inline-block;
+  min-width: 76px;
+}
+
+.no-results {
+  text-align: center;
+  padding: .2rem 1.25rem;
+}
