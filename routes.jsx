@@ -1,5 +1,5 @@
 const express = require('express')
-const { generateSchema } = require('./models/budgetLine')
+const BudgetLine = require('./models/budgetLine')
 const router = express.Router()
 const slugify = require('slugify')
 
@@ -8,10 +8,6 @@ const types = require('./utils/types')
 const lookupType = (type) => {
   const upperCaseType = type.toUpperCase()
   return types.find(d => d.type === upperCaseType).description
-}
-
-const schemaMap = {
-  fy19: generateSchema('ccp-10-18')
 }
 
 router.get('/', (req, res) => {
@@ -139,6 +135,44 @@ router.get('/:fy/type/:type/budgetline/:budgetlineid/:description', async (req, 
       type
     })
   } catch (err) { next(err) }
+})
+
+router.get('/api/budgetline/:budgetlineid/:description', async (req, res, next) => {
+  const { budgetlineid } = req.params
+  try {
+    const data = await BudgetLine
+      .find({ budgetLineId: budgetlineid.toUpperCase() })
+      .sort({ fy: -1 })
+    const noProjects = data.map((budgetline) => {
+      const {
+        fy,
+        budgetLineId,
+        fmsNumber,
+        description,
+        availableBalance,
+        contractLiability,
+        itdExpenditures,
+        adoptedAppropriations,
+        commitmentPlan
+      } = budgetline
+      return {
+        fy,
+        budgetLineId,
+        fmsNumber,
+        description,
+        availableBalance,
+        contractLiability,
+        itdExpenditures,
+        adoptedAppropriations,
+        commitmentPlan
+      }
+    })
+    res.json(noProjects)
+  } catch (err) { next(err) }
+})
+
+router.get('/budgetline/:budgetlineid/:description', async (req, res, next) => {
+  res.render('budgetlinetimeline')
 })
 
 router.get('/:fy/type/:type/budgetline/:budgetlineid/project/:projectid/:description', async (req, res, next) => {
