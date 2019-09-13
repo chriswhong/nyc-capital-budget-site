@@ -8,7 +8,8 @@ const BudgetlineTimeline = (props) => {
       <div className='container mt-4'>
         <div className='row'>
           <div className='col-12'>
-            <div id='chart' />
+            <div id='available-balance-chart' />
+            <div id='commitment-chart' />
           </div>
         </div>
       </div>
