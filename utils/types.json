@@ -144,6 +144,10 @@
     "description": "Sewers"
   },
   {
+    "type": "ST",
+    "description": "Staten Island Rapid Transit"
+  },
+  {
     "type": "T",
     "description": "Transit Authority"
   },

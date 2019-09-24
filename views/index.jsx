@@ -35,7 +35,7 @@ const Index = (props) => {
               } = budgetType
               return (
                 <div key={_id} className='col-md-6'>
-                  <a className='text-decoration-none' href={`/${fy}/type/${_id.toLowerCase()}/${slugify(description, { lower: true })}`}>
+                  <a className='text-decoration-none' href={`/type/${_id.toLowerCase()}/${slugify(description, { lower: true })}`}>
                     <div className='card mb-4'>
                       <div className='card-body'>
                         <h4 className='card-title'>{description}</h4>
@@ -46,14 +46,8 @@ const Index = (props) => {
                         <div className='row'>
                           <div className='col-6'>
                             <div className='total-container'>
-                              <h6>FY19-FY22 Appropriations</h6>
+                              <h6>FY08-FY22 Appropriations</h6>
                               <div className='big-money'>{formatMoney(totalAppropriations)}</div>
-                            </div>
-                          </div>
-                          <div className='col-6'>
-                            <div className='total-container'>
-                              <h6>FY19-FY22 Commitments</h6>
-                              <div className='big-money'>{formatMoney(totalCommitments)}</div>
                             </div>
                           </div>
                         </div>

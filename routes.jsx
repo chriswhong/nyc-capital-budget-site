@@ -7,25 +7,118 @@ const types = require('./utils/types')
 
 const lookupType = (type) => {
   const upperCaseType = type.toUpperCase()
+  console.log(upperCaseType)
   return types.find(d => d.type === upperCaseType).description
 }
 
-router.get('/', (req, res) => {
-  res.redirect('/fy19')
+router.get('/', async (req, res, next) => {
+  try {
+    let budgetTypes = await BudgetLine.aggregate([
+      {
+        $project: {
+          budgetLineId: '$budgetLineId',
+          projectType: { $split: ['$budgetLineId', '-'] },
+          projects: {
+            $map: {
+              input: '$projects',
+              in: '$$this.id'
+            }
+          },
+          totalAppropriations: {
+            $reduce: {
+              input: {
+                $map: {
+                  input: '$adoptedAppropriations',
+                  in: { $sum: ['$$this.city', '$$this.nonCity'] }
+                }
+              },
+              initialValue: 0,
+              in: { $add: ['$$value', '$$this'] }
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: '$budgetLineId',
+          projectType: { $first: '$projectType' },
+          projects: { $addToSet: '$projects' },
+          totalAppropriations: { $sum: '$totalAppropriations' }
+        }
+      },
+      {
+        $addFields: {
+          projects: {
+            $reduce: {
+              input: '$projects',
+              initialValue: [],
+              in: { $setUnion: ['$$value', '$$this'] }
+            }
+          }
+        }
+      },
+      { $unwind: '$projectType' },
+      { $match: { projectType: /^[A-Z]{1,2}$/ } },
+      {
+        $group: {
+          _id: '$projectType',
+          budgetLines: { $sum: 1 },
+          projects: { $addToSet: '$projects' },
+          totalAppropriations: { $sum: '$totalAppropriations' }
+          // totalCommitments: { $sum: '$totalCommitments' }
+        }
+      },
+      {
+        $addFields: {
+          projects: {
+            $size: {
+              $reduce: {
+                input: '$projects',
+                initialValue: [],
+                in: { $setUnion: ['$$value', '$$this'] }
+              }
+            }
+          }
+        }
+      },
+      { $sort: { totalAppropriations: -1 } }
+    ])
+
+    console.log(budgetTypes)
+
+    budgetTypes = budgetTypes.map((budgetType) => {
+      const description = lookupType(budgetType._id)
+
+      return {
+        description,
+        ...budgetType
+      }
+    })
+    console.log(budgetTypes)
+    res.render('index', {
+      title: 'NYC Capital Commitment Plan',
+      budgetTypes
+    })
+  } catch (err) { next(err) }
 })
 
 // list all budgetlines for a type
-router.get('/:fy/type/:type/:description', async (req, res, next) => {
-  const { fy, type } = req.params
+router.get('/type/:type/:description', async (req, res, next) => {
+  const { type } = req.params
   try {
-    const BudgetLine = schemaMap[fy]
     const budgetLines = await BudgetLine.aggregate([
       {
         $project: {
           budgetLineId: '$budgetLineId',
           description: '$description',
           fmsNumber: '$fmsNumber',
-          projectCount: { $size: '$projects' },
+          fy: '$fy',
+          projects: {
+            $map: {
+              input: '$projects',
+              in: '$$this.id'
+            }
+          },
           totalAppropriations: {
             $reduce: {
               input: {
@@ -59,85 +152,45 @@ router.get('/:fy/type/:type/:description', async (req, res, next) => {
           }
         }
       },
-      { $sort: { totalCommitments: -1 } }
-    ])
-
-    res.render('type', {
-      title: 'Project Types',
-      budgetLines,
-      type,
-      typeDisplay: lookupType(type),
-      fy
-    })
-  } catch (err) { next(err) }
-})
-
-// list all budgetlines
-router.get('/budgetlines', async (req, res, next) => {
-  try {
-    const BudgetLine = schemaMap[req.params.fy]
-    const budgetLines = await BudgetLine.find({}).select('budgetLineId description')
-    res.render('budgetlines', { title: 'budget Lines', budgetLines })
-  } catch (err) { next(err) }
-})
-
-router.get('/:fy/type/:type/budgetline/:budgetlineid/:description', async (req, res, next) => {
-  const { fy, type, budgetlineid } = req.params
-  try {
-    const BudgetLine = schemaMap[fy]
-    const [data] = await BudgetLine.aggregate([
       {
-        $project: {
-          budgetLineId: '$budgetLineId',
-          fmsNumber: '$fmsNumber',
-          description: '$description',
-          availableBalance: '$availableBalance',
-          contractLiability: '$contractLiability',
-          itdExpenditures: '$itdExpenditures',
-          adoptedAppropriations: '$adoptedAppropriations',
-          commitmentPlan: '$commitmentPlan',
+        $group: {
+          _id: '$budgetLineId',
+          description: { $first: '$description' },
+          fmsNumber: { $first: '$fmsNumber' },
+          projects: { $addToSet: '$projects' },
+          lowFy: { $min: '$fy' },
+          highFy: { $max: '$fy' },
+          totalAppropriations: { $sum: '$totalAppropriations' }
+        }
+      },
+      {
+        $addFields: {
           projects: {
-            $map: {
-              input: '$projects',
-              in: {
-                managingAgency: '$$this.managingAgency',
-                id: '$$this.id',
-                description: '$$this.description',
-                commitmentCount: { $size: '$$this.commitments' },
-                totalCommitments: {
-                  $reduce: {
-                    input: {
-                      $map: {
-                        input: '$$this.commitments',
-                        in: { $sum: ['$$this.cost.city', '$$this.cost.nonCity'] }
-                      }
-                    },
-                    initialValue: 0,
-                    in: { $add: ['$$value', '$$this'] }
-                  }
-                }
+            $size: {
+              $reduce: {
+                input: '$projects',
+                initialValue: [],
+                in: { $setUnion: ['$$value', '$$this'] }
               }
             }
           }
         }
       },
-      {
-        $match: {
-          budgetLineId: budgetlineid.toUpperCase()
-        }
-      }
+      { $sort: { totalAppropriations: -1 } }
     ])
 
-    res.render('budgetlines', {
-      title: 'budget Line',
-      data,
-      fy,
-      type
+    console.log(budgetLines)
+
+    res.render('type', {
+      title: 'Project Types',
+      budgetLines,
+      type,
+      typeDisplay: lookupType(type)
     })
   } catch (err) { next(err) }
 })
 
-router.get('/api/budgetline/:budgetlineid/:description', async (req, res, next) => {
+router.get('/api/budgetline/:budgetlineid', async (req, res, next) => {
   const { budgetlineid } = req.params
   try {
     const data = await BudgetLine
@@ -171,36 +224,97 @@ router.get('/api/budgetline/:budgetlineid/:description', async (req, res, next) 
   } catch (err) { next(err) }
 })
 
-router.get('/budgetline/:budgetlineid/:description', async (req, res, next) => {
-  res.render('budgetlinetimeline')
-})
-
-router.get('/:fy/type/:type/budgetline/:budgetlineid/project/:projectid/:description', async (req, res, next) => {
-  const { fy, type, projectid } = req.params
-  try {
-    const BudgetLine = schemaMap[fy]
-    const { projects } = await BudgetLine.findOne({
-      projects: {
-        $elemMatch: {
-          id: req.params.projectid.toUpperCase()
+router.get('/type/:type/budgetline/:budgetlineid/:description', async (req, res, next) => {
+  const { budgetlineid } = req.params
+  const budgetLines = await BudgetLine.aggregate([
+    {
+      $project: {
+        budgetLineId: '$budgetLineId',
+        description: '$description',
+        fmsNumber: '$fmsNumber',
+        projects: '$projects',
+        totalAppropriations: {
+          $reduce: {
+            input: {
+              $map: {
+                input: '$adoptedAppropriations',
+                in: { $sum: ['$$this.city', '$$this.nonCity'] }
+              }
+            },
+            initialValue: 0,
+            in: { $add: ['$$value', '$$this'] }
+          }
+        },
+        totalCommitments: {
+          $reduce: {
+            input: {
+              $map: {
+                input: '$commitmentPlan',
+                in: { $sum: ['$$this.city', '$$this.nonCity'] }
+              }
+            },
+            initialValue: 0,
+            in: { $add: ['$$value', '$$this'] }
+          }
         }
       }
-    })
+    },
+    {
+      $match: {
+        budgetLineId: {
+          $regex: new RegExp(`^${budgetlineid.toUpperCase()}`)
+        }
+      }
+    },
+    { $unwind: '$projects' },
+    {
+      $group: {
+        _id: '$projects.id',
+        projectDescription: { $first: '$projects.description' },
+        managingAgency: { $first: '$projects.managingAgency' },
+        budgetLineId: { $first: '$budgetLineId' },
+        description: { $first: '$description' },
+        fmsNumber: { $first: '$fmsNumber' },
+        totalAppropriations: { $first: '$totalAppropriations' }
+      }
+    },
+    {
+      $group: {
+        _id: '$budgetLineId',
+        description: { $first: '$description' },
+        fmsNumber: { $first: '$fmsNumber' },
+        totalAppropriations: { $first: '$totalAppropriations' },
+        projects: {
+          $push: {
+            id: '$_id',
+            description: '$projectDescription',
+            managingAgency: '$managingAgency'
+          }
+        }
+      }
+    }
+    // {
+    //   $addFields: {
+    //     projects: {
+    //       $reduce: {
+    //         input: '$projects',
+    //         initialValue: [],
+    //         in: { $setUnion: ['$$value', '$$this'] }
+    //       }
+    //     }
+    //   }
+    // }
+    // { $sort: { totalAppropriations: -1 } }
+  ])
 
-    const project = projects.find(d => d.id.toLowerCase() === projectid)
-    res.render('project', {
-      title: 'budget Line',
-      project,
-      fy,
-      type
-    })
-  } catch (err) { next(err) }
+  console.log(budgetLines)
+
+  res.render('budgetlinetimeline', { title: 'Budget Line Timeline', budgetLine: budgetLines[0] })
 })
 
 router.get('/search', async (req, res) => {
   const { q } = req.query
   const queryRegex = new RegExp(`.*${q}.*`, 'i')
-  const BudgetLine = schemaMap.fy19
 
   let budgetLines = await BudgetLine
     .find({
@@ -251,71 +365,6 @@ router.get('/search', async (req, res) => {
     ...budgetLines,
     ...projects
   ])
-})
-
-router.get('/:fy', async (req, res, next) => {
-  const { fy } = req.params
-  try {
-    const BudgetLine = schemaMap[fy]
-    let budgetTypes = await BudgetLine.aggregate([
-      {
-        $project: {
-          projectType: { $split: ['$budgetLineId', '-'] },
-          projectCount: { $size: '$projects' },
-          totalAppropriations: {
-            $reduce: {
-              input: {
-                $map: {
-                  input: '$adoptedAppropriations',
-                  in: { $sum: ['$$this.city', '$$this.nonCity'] }
-                }
-              },
-              initialValue: 0,
-              in: { $add: ['$$value', '$$this'] }
-            }
-          },
-          totalCommitments: {
-            $reduce: {
-              input: {
-                $map: {
-                  input: '$commitmentPlan',
-                  in: { $sum: ['$$this.city', '$$this.nonCity'] }
-                }
-              },
-              initialValue: 0,
-              in: { $add: ['$$value', '$$this'] }
-            }
-          }
-        }
-      },
-      { $unwind: '$projectType' },
-      { $match: { projectType: /^[A-Z]{1,2}$/ } },
-      {
-        $group: {
-          _id: '$projectType',
-          budgetLines: { $sum: 1 },
-          projects: { $sum: '$projectCount' },
-          totalAppropriations: { $sum: '$totalAppropriations' },
-          totalCommitments: { $sum: '$totalCommitments' }
-        }
-      },
-      { $sort: { totalCommitments: -1 } }
-    ])
-
-    budgetTypes = budgetTypes.map((budgetType) => {
-      const description = lookupType(budgetType._id)
-
-      return {
-        description,
-        ...budgetType
-      }
-    })
-    res.render('index', {
-      title: `NYC ${fy.toUpperCase()} Capital Commitment Plan`,
-      budgetTypes,
-      fy
-    })
-  } catch (err) { next(err) }
 })
 
 // AG-DN100
