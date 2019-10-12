@@ -4,26 +4,92 @@
 // all fys in our db plus 3 more years
 const fys = ['fy08', 'fy09', 'fy10', 'fy11', 'fy12', 'fy13', 'fy14', 'fy15', 'fy16', 'fy17', 'fy18', 'fy19', 'fy20', 'fy21', 'fy22']
 
+const formatCost = (number) => {
+  return `$${d3.format('.3s')(number)}`
+}
+
+const getTypeLabel = (type) => {
+  switch (type) {
+    case 'CN':
+      return 'City'
+    case 'CX':
+      return 'City Exempt'
+    case 'F':
+      return 'Federal'
+    case 'S':
+      return 'State'
+    case 'P':
+      return 'Private'
+  }
+}
+
 const pad = (num, size) => {
-  var s = num + ''
+  const s = num + ''
   while (s.length < size) s = '0' + s
   return s
 }
 
-const renderAvailableBalanceChart = (data) => {
-  const availableBalance = data.map((budgetline) => {
-    const { asOf, city, nonCity, total } = budgetline.availableBalance
-    return {
-      asOf,
-      city,
-      nonCity,
-      total
-    }
-  })
+const checkForType = (data, key) => {
+  return data.reduce((acc, curr) => {
+    return Object.keys(curr).includes(key)
+  }, false)
+}
 
-  // convert asOf date MM/DD/YY into one of our fys
-  availableBalance.forEach((d) => {
-    d.asOf = `fy${pad(parseInt(d.asOf.split('/')[2]) + 1, 2)}`
+const renderAvailableBalanceChart = (data) => {
+  let tipBox // tooltips based on http://bl.ocks.org/wdickerson/64535aff478e8a9fd9d9facccfef8929
+  const tooltip = d3.select('#tooltip')
+
+  const removeTooltip = () => {
+    if (tooltip) tooltip.style('display', 'none')
+    if (tooltipLine) tooltipLine.attr('stroke', 'none')
+  }
+
+  const renderTooltip = (year) => {
+    const balances = availableBalance.find(d => d.asOf === year)
+    const types = Object.keys(balances).filter(d => ['CN', 'CX', 'F', 'S', 'P'].includes(d))
+    return `
+      <div class='tiny'>Available at start of ${year.toUpperCase()}</div>
+      <div class='tooltip-items'>
+        <div class='tooltip-item total'>${formatCost(balances.total)}</div>
+        <hr/>
+        ${types.map((type) => {
+          return `
+            <div class='tooltip-item'><span class='tiny'>${getTypeLabel(type)}:</span> ${formatCost(balances[type])}</div>
+          `
+        }).join('')}
+      </div>
+    `
+  }
+
+  const drawTooltip = () => {
+    const year = xScale.invert(d3.mouse(tipBox.node())[0])
+
+    tooltipLine.attr('stroke', 'black')
+      .transition(d3.transition()
+        .duration(100)
+        .ease(d3.easeLinear)
+      )
+      .attr('x1', xScale(year))
+      .attr('x2', xScale(year))
+      .attr('y1', 0)
+      .attr('y2', height)
+
+    tooltip
+      .style('display', 'block')
+      .style('left', `${d3.event.offsetX + 50}px`)
+      .style('top', `${d3.event.offsetY - 20}px`)
+
+    tooltip.html(renderTooltip(year))
+  }
+
+  const availableBalance = data.map((budgetline) => {
+    return {
+      asOf: budgetline.fy,
+      ...budgetline.appropriationAvailableAsOf,
+      total: Object.keys(budgetline.appropriationAvailableAsOf).reduce((acc, key) => {
+        return acc + budgetline.appropriationAvailableAsOf[key]
+      }, 0)
+    }
   })
 
   const maxCost = d3.max(availableBalance, d => d.total)
@@ -31,44 +97,56 @@ const renderAvailableBalanceChart = (data) => {
   const CONTAINER_SELECTOR = '#available-balance-chart'
   const divWidth = d3.select(CONTAINER_SELECTOR).style('width').slice(0, -2)
   // 2. Use the margin convention practice
-  var margin = { top: 50, right: 50, bottom: 50, left: 100 }
-  var width = divWidth - margin.left - margin.right // Use the window's width
-  var height = 280 - margin.top - margin.bottom // Use the window's height
+  const margin = { top: 50, right: 50, bottom: 50, left: 100 }
+  const width = divWidth - margin.left - margin.right // Use the window's width
+  const height = 280 - margin.top - margin.bottom // Use the window's height
 
   // 5. X scale will use the index of our data
-  var xScale = d3.scaleBand()
+  const xScale = d3.scaleBand()
     .domain(fys) // input
     .rangeRound([0, width])
     .paddingInner(0.05)
     .align(0.1)
 
+  xScale.invert = function (x) {
+    const domain = this.domain()
+    const range = this.range()
+    const scale = d3.scaleQuantize().domain(range).range(domain)
+    return scale(x)
+  }
+
   // 6. Y scale will use the randomly generate number
-  var yScale = d3.scaleLinear()
+  const yScale = d3.scaleLinear()
     .domain([0, maxCost]) // input
     .range([height, 0]) // output
 
-  // 7. d3's line generator
-  var line = d3.line()
-    .x((d) => xScale(d.asOf)) // set the x values for the line generator
-    .y((d) => yScale(d.total)) // set the y values for the line generator
-    .curve(d3.curveMonotoneX) // apply smoothing to the line
+  const appendLine = (svg, data, type) => {
+    svg.append('path')
+      .datum(data)
+      .attr('class', `line line-${type}`)
+      .attr('d', d3.line()
+        .x((d) => xScale(d.asOf))
+        .y((d) => yScale(d[type] || 0))
+        .curve(d3.curveMonotoneX)
+      )
 
-  var lineCity = d3.line()
-    .x((d) => xScale(d.asOf)) // set the x values for the line generator
-    .y((d) => yScale(d.city)) // set the y values for the line generator
-    .curve(d3.curveMonotoneX) // apply smoothing to the line
-
-  var lineNonCity = d3.line()
-    .x((d) => xScale(d.asOf)) // set the x values for the line generator
-    .y((d) => yScale(d.nonCity)) // set the y values for the line generator
-    .curve(d3.curveMonotoneX) // apply smoothing to the line
+    svg.selectAll(`dot-${type}`)
+      .data(data)
+      .enter().append('circle') // Uses the enter().append() method
+      .attr('class', `dot dot-${type}`)
+      .attr('cx', (d) => xScale(d.asOf))
+      .attr('cy', (d) => yScale(d[type] || 0))
+      .attr('r', 3)
+  }
 
   // 1. Add the SVG to the page and employ #2
-  var svg = d3.select(CONTAINER_SELECTOR).append('svg')
+  const svg = d3.select(CONTAINER_SELECTOR).append('svg')
     .attr('width', width + margin.left + margin.right)
     .attr('height', height + margin.top + margin.bottom)
     .append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+
+  const tooltipLine = svg.append('line')
 
   // 3. Call the x axis in a group tag
   svg.append('g')
@@ -85,32 +163,23 @@ const renderAvailableBalanceChart = (data) => {
         .tickFormat(d3.format('$,.0s'))
     ) // Create an axis component with d3.axisLeft
 
-  // 9. Append the path, bind the data, and call the line generator
-  svg.append('path')
-    .datum(availableBalance) // 10. Binds data to the line
-    .attr('class', 'line line-total') // Assign a class for styling
-    .attr('d', line) // 11. Calls the line generator
+  // always do total, for subsequent types determine whether the data include that type
+  appendLine(svg, availableBalance, 'total')
+  const types = ['CN', 'CX', 'F', 'S', 'P']
 
-  // 9. Append the path, bind the data, and call the line generator
-  svg.append('path')
-    .datum(availableBalance) // 10. Binds data to the line
-    .attr('class', 'line line-city') // Assign a class for styling
-    .attr('d', lineCity) // 11. Calls the line generator
+  types.forEach((type) => {
+    if (checkForType(availableBalance, type)) {
+      appendLine(svg, availableBalance, type)
+    }
+  })
 
-  // 9. Append the path, bind the data, and call the line generator
-  svg.append('path')
-    .datum(availableBalance) // 10. Binds data to the line
-    .attr('class', 'line line-noncity') // Assign a class for styling
-    .attr('d', lineNonCity) // 11. Calls the line generator
-
-  // 12. Appends a circle for each datapoint
-  svg.selectAll('.dot')
-    .data(availableBalance)
-    .enter().append('circle') // Uses the enter().append() method
-    .attr('class', 'dot') // Assign a class for styling
-    .attr('cx', (d) => xScale(d.asOf))
-    .attr('cy', (d) => yScale(d.total))
-    .attr('r', 5)
+  tipBox = svg.append('rect')
+    .attr('class', 'tooltip-area')
+    .attr('width', width)
+    .attr('height', height)
+    .attr('opacity', 0)
+    .on('mousemove', drawTooltip)
+    .on('mouseout', removeTooltip)
 }
 
 const renderCommitmentChart = (data) => {
@@ -146,41 +215,37 @@ const renderCommitmentChart = (data) => {
     })
   })
 
-  console.log(commitmentData)
   const yearTotals = fys.map((fy) => {
     // sum all commitmentData for this fy
     return commitmentData.reduce((acc, curr) => {
-      console.log(fy)
       return acc + curr[fy]
     }, 0)
   })
 
-  console.log(yearTotals)
-
   const divWidth = d3.select(CONTAINER_SELECTOR).style('width').slice(0, -2)
   // 2. Use the margin convention practice
-  var margin = { top: 50, right: 50, bottom: 50, left: 100 }
-  var width = divWidth - margin.left - margin.right // Use the window's width
-  var height = 280 - margin.top - margin.bottom // Use the window's height
+  const margin = { top: 50, right: 50, bottom: 50, left: 100 }
+  const width = divWidth - margin.left - margin.right // Use the window's width
+  const height = 280 - margin.top - margin.bottom // Use the window's height
 
   // 5. X scale will use the index of our data
-  var xScale = d3.scaleBand()
+  const xScale = d3.scaleBand()
     .domain(fys) // input
     .rangeRound([0, width])
     .paddingInner(0.05)
     .align(0.1)
 
-  var yScale = d3.scaleLinear()
+  const yScale = d3.scaleLinear()
     .domain([0, d3.max(yearTotals)]) // input
     .range([height, 0]) // output
 
   // set the colors
-  var z = d3.scaleOrdinal()
+  const z = d3.scaleOrdinal()
     .domain(fys)
     .range(['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00'])
 
   // 1. Add the SVG to the page and employ #2
-  var svg = d3.select(CONTAINER_SELECTOR).append('svg')
+  const svg = d3.select(CONTAINER_SELECTOR).append('svg')
     .attr('width', width + margin.left + margin.right)
     .attr('height', height + margin.top + margin.bottom)
     .append('g')
@@ -222,5 +287,5 @@ const budgetLineId = window.location.href.split('/')[6]
 d3.json(`/api/budgetline/${budgetLineId}`)
   .then((data) => {
     renderAvailableBalanceChart(data)
-    renderCommitmentChart(data)
+    // renderCommitmentChart(data)
   })

@@ -74,18 +74,36 @@ a > .card:hover {
 }
 
 .line-total {
-  stroke: #ffab00;
+  stroke: #dedede;
+  stroke-width: 12px;
+  stroke-opacity: 0.6;
 }
 
-.line-city {
-  stroke: green;
+.line-CX, .dot-CX {
+  stroke: #66c2a5;
   stroke-width: 2;
 }
 
-.line-noncity {
-  stroke: purple;
+.line-CN, .dot-CN {
+  stroke: #fc8d62;
   stroke-width: 2;
 }
+
+.line-F, .dot-F {
+  stroke: #8da0cb;
+  stroke-width: 2;
+}
+
+.line-S, .dot-S {
+  stroke: #e78ac3;
+  stroke-width: 2;
+}
+
+.line-P, .dot-P {
+  stroke: #a6d854;
+  stroke-width: 2;
+}
+
 
 .overlay {
   fill: none;
@@ -94,11 +112,48 @@ a > .card:hover {
 
 /* Style the dots by assigning a fill and stroke */
 .dot {
-    fill: #ffab00;
-    stroke: #fff;
+  fill: #fff;
+  stroke-width: 1px;
 }
 
   .focus circle {
   fill: none;
   stroke: steelblue;
-}";
+}
+
+.legend-item {
+  padding: 0 5px;
+  font-size: 0.5rem;
+}
+
+.legend-item svg {
+  min-width: 18px;
+  margin-right: 5px;
+}
+
+#tooltip {
+  position: absolute;
+  background-color: #f2f2f2eb;
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 3px solid #6c6c6c24;
+}
+
+#tooltip .tiny {
+  font-weight: 700;
+  font-size: .6rem;
+}
+
+#tooltip .tooltip-item {
+  text-align: right;
+}
+
+#tooltip .total {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+#tooltip hr {
+  margin: 0;
+}
