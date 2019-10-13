@@ -205,7 +205,7 @@ const renderAppropriationsChart = (data) => {
   // make an object for each fy
   const commitmentData = fys.map((fy) => {
     return {
-      baseFy: fy,
+      fy: fy,
       ...emptyFys
     }
   })
@@ -220,20 +220,20 @@ const renderAppropriationsChart = (data) => {
       // calculate the actual fy from offsetFy
       const fyToSet = `fy${pad(parseInt(fy.split('fy')[1]) + i, 2)}`
       const types = [CN, CX, F, S, P]
-      const yearToSet = commitmentData.find(d => d.baseFy === fy)
+      const yearToSet = commitmentData.find(d => d.fy === fyToSet)
       const total = types.reduce((acc, type) => {
         return type ? acc + type : acc
       }, 0)
-      yearToSet[fyToSet] = total
+      yearToSet[fy] = total
     })
   })
 
-  console.log(commitmentData)
+  console.log('ready to stack', commitmentData)
 
   const yearTotals = fys.map((fy) => {
     // sum all commitmentData for this fy
     return commitmentData.reduce((acc, curr) => {
-      return acc + curr[fy]
+      return curr[fy] ? acc + curr[fy] : acc
     }, 0)
   })
 
@@ -287,14 +287,14 @@ const renderAppropriationsChart = (data) => {
   console.log(stacked)
 
   svg.selectAll('.serie')
-    .data(stacked)
+    .data(d3.stack().keys(fys)(commitmentData), d => d.key)
     .enter().append('g')
     .attr('class', 'serie')
     .attr('fill', function (d) { return z(d.key) })
     .selectAll('rect')
     .data(function (d) { return d })
     .enter().append('rect')
-    .attr('x', function (d) { return xScale(d.data.baseFy) })
+    .attr('x', function (d) { return xScale(d.data.fy) })
     .attr('y', function (d) { return yScale(d[1]) })
     .attr('height', function (d) { return yScale(d[0]) - yScale(d[1]) })
     .attr('width', xScale.bandwidth())
