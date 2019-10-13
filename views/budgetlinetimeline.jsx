@@ -18,7 +18,6 @@ const LegendItem = ({ type, label }) => (
 )
 
 const BudgetlineTimeline = ({ title, budgetLine }) => {
-  console.log(budgetLine)
   const {
     _id,
     fmsNumber,
@@ -79,6 +78,7 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
           </div> */
           }
         </div>
+        <hr />
         <div className='row'>
           <div className='col-12 col-md-6'>
             <h4>Available balance FY08-FY22</h4>
@@ -95,11 +95,25 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
             <div id='tooltip' />
           </div>
         </div>
+        <hr />
+        <div className='row'>
+          <div className='col-12 col-md-6'>
+            <h4>Appropriations FY08-FY22</h4>
+            <p>Each year, money is appropriated to budget lines, and may be spread across the current fiscal year or any of the next three fiscal years.  This chart shows each year's appropriations combined with neighboring years</p>
+          </div>
+          <div className='col-12 col-md-6 d-flex justify-content-end'>
+            Foo
+          </div>
+          <div className='col-12'>
+            <div id='appropriations-chart' />
+            <div id='tooltip' />
+          </div>
+        </div>
+        <hr />
         <div className='row'>
           <div className='col-12'>
             {
               // projects.map((project) => {
-              //   console.log(project)
               //   const { id, description, managingAgency } = project
               //   return (
               //     <div key={id} className='card mb-3'>

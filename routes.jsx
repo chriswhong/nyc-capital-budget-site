@@ -7,7 +7,55 @@ const types = require('./utils/types')
 
 const lookupType = (type) => {
   const upperCaseType = type.toUpperCase()
+  console.log(type)
   return types.find(d => d.type === upperCaseType).description
+}
+
+const reduceTotalAppropriations = {
+  $reduce: {
+    input: {
+      $objectToArray: {
+        fy0: {
+          $reduce: {
+            input: {
+              $objectToArray: '$fy0'
+            },
+            initialValue: 0,
+            in: { $add: ['$$value', '$$this.v'] }
+          }
+        },
+        fy1: {
+          $reduce: {
+            input: {
+              $objectToArray: '$fy1'
+            },
+            initialValue: 0,
+            in: { $add: ['$$value', '$$this.v'] }
+          }
+        },
+        fy2: {
+          $reduce: {
+            input: {
+              $objectToArray: '$fy2'
+            },
+            initialValue: 0,
+            in: { $add: ['$$value', '$$this.v'] }
+          }
+        },
+        fy3: {
+          $reduce: {
+            input: {
+              $objectToArray: '$fy3'
+            },
+            initialValue: 0,
+            in: { $add: ['$$value', '$$this.v'] }
+          }
+        }
+      }
+    },
+    initialValue: 0,
+    in: { $add: ['$$value', '$$this.v'] }
+  }
 }
 
 router.get('/', async (req, res, next) => {
@@ -15,75 +63,59 @@ router.get('/', async (req, res, next) => {
     let budgetTypes = await BudgetLine.aggregate([
       {
         $project: {
-          budgetLineId: '$budgetLineId',
-          projectType: { $split: ['$budgetLineId', '-'] },
-          projects: {
-            $map: {
-              input: '$projects',
-              in: '$$this.id'
-            }
-          },
-          totalAppropriations: {
-            $reduce: {
-              input: {
-                $map: {
-                  input: '$adoptedAppropriations',
-                  in: { $sum: ['$$this.city', '$$this.nonCity'] }
-                }
-              },
-              initialValue: 0,
-              in: { $add: ['$$value', '$$this'] }
-            }
-          }
+          budgetLineId: '$id',
+          projectType: { $split: ['$id', '-'] },
+          totalAppropriations: reduceTotalAppropriations
         }
       },
       {
         $group: {
           _id: '$budgetLineId',
           projectType: { $first: '$projectType' },
-          projects: { $addToSet: '$projects' },
           totalAppropriations: { $sum: '$totalAppropriations' }
         }
       },
-      {
-        $addFields: {
-          projects: {
-            $reduce: {
-              input: '$projects',
-              initialValue: [],
-              in: { $setUnion: ['$$value', '$$this'] }
-            }
-          }
-        }
-      },
+      // {
+      //   $addFields: {
+      //     projects: {
+      //       $reduce: {
+      //         input: '$projects',
+      //         initialValue: [],
+      //         in: { $setUnion: ['$$value', '$$this'] }
+      //       }
+      //     }
+      //   }
+      // },
       { $unwind: '$projectType' },
       { $match: { projectType: /^[A-Z]{1,2}$/ } },
       {
         $group: {
           _id: '$projectType',
           budgetLines: { $sum: 1 },
-          projects: { $addToSet: '$projects' },
           totalAppropriations: { $sum: '$totalAppropriations' }
           // totalCommitments: { $sum: '$totalCommitments' }
         }
       },
-      {
-        $addFields: {
-          projects: {
-            $size: {
-              $reduce: {
-                input: '$projects',
-                initialValue: [],
-                in: { $setUnion: ['$$value', '$$this'] }
-              }
-            }
-          }
-        }
-      },
+      // {
+      //   $addFields: {
+      //     projects: {
+      //       $size: {
+      //         $reduce: {
+      //           input: '$projects',
+      //           initialValue: [],
+      //           in: { $setUnion: ['$$value', '$$this'] }
+      //         }
+      //       }
+      //     }
+      //   }
+      // },
       { $sort: { totalAppropriations: -1 } }
     ])
 
+    console.log(budgetTypes)
+
     budgetTypes = budgetTypes.map((budgetType) => {
+
       const description = lookupType(budgetType._id)
 
       return {
@@ -110,52 +142,7 @@ router.get('/type/:type/:description', async (req, res, next) => {
           description: '$description',
           fmsNumber: '$fmsId',
           fy: '$fy',
-          totalAppropriations: {
-            $reduce: {
-              input: {
-                $objectToArray: {
-                  fy0: {
-                    $reduce: {
-                      input: {
-                        $objectToArray: '$fy0'
-                      },
-                      initialValue: 0,
-                      in: { $add: ['$$value', '$$this.v'] }
-                    }
-                  },
-                  fy1: {
-                    $reduce: {
-                      input: {
-                        $objectToArray: '$fy1'
-                      },
-                      initialValue: 0,
-                      in: { $add: ['$$value', '$$this.v'] }
-                    }
-                  },
-                  fy2: {
-                    $reduce: {
-                      input: {
-                        $objectToArray: '$fy2'
-                      },
-                      initialValue: 0,
-                      in: { $add: ['$$value', '$$this.v'] }
-                    }
-                  },
-                  fy3: {
-                    $reduce: {
-                      input: {
-                        $objectToArray: '$fy3'
-                      },
-                      initialValue: 0,
-                      in: { $add: ['$$value', '$$this.v'] }
-                    }
-                  }
-                }
-              },
-              initialValue: 0,
-              in: { $add: ['$$value', '$$this.v'] }
-            }
-          }
+          totalAppropriations: reduceTotalAppropriations
         }
       },
       {
@@ -194,15 +181,24 @@ router.get('/api/budgetline/:id', async (req, res, next) => {
       .find({ id: id.toUpperCase() })
       .sort({ fy: 1 })
     const noProjects = data.map((budgetline) => {
+      console.log(budgetline)
       const {
         fy,
         id,
-        appropriationAvailableAsOf
+        appropriationAvailableAsOf,
+        fy0,
+        fy1,
+        fy2,
+        fy3
       } = budgetline
       return {
         fy,
         id,
-        appropriationAvailableAsOf
+        appropriationAvailableAsOf,
+        fy0,
+        fy1,
+        fy2,
+        fy3
       }
     })
     res.json(noProjects)
@@ -218,52 +214,7 @@ router.get('/type/:type/budgetline/:budgetlineid/:description', async (req, res,
         id: '$id',
         description: '$description',
         fmsId: '$fmsId',
-        totalAppropriations: {
-          $reduce: {
-            input: {
-              $objectToArray: {
-                fy0: {
-                  $reduce: {
-                    input: {
-                      $objectToArray: '$fy0'
-                    },
-                    initialValue: 0,
-                    in: { $add: ['$$value', '$$this.v'] }
-                  }
-                },
-                fy1: {
-                  $reduce: {
-                    input: {
-                      $objectToArray: '$fy1'
-                    },
-                    initialValue: 0,
-                    in: { $add: ['$$value', '$$this.v'] }
-                  }
-                },
-                fy2: {
-                  $reduce: {
-                    input: {
-                      $objectToArray: '$fy2'
-                    },
-                    initialValue: 0,
-                    in: { $add: ['$$value', '$$this.v'] }
-                  }
-                },
-                fy3: {
-                  $reduce: {
-                    input: {
-                      $objectToArray: '$fy3'
-                    },
-                    initialValue: 0,
-                    in: { $add: ['$$value', '$$this.v'] }
-                  }
-                }
-              }
-            },
-            initialValue: 0,
-            in: { $add: ['$$value', '$$this.v'] }
-          }
-        }
+        totalAppropriations: reduceTotalAppropriations
       }
     },
     {

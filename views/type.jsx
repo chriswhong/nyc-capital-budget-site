@@ -12,8 +12,6 @@ const ProjectType = (props) => {
 
   const grandTotalAppropriations = budgetLines.reduce((acc, curr) => acc + curr.totalAppropriations, 0)
 
-  console.log(grandTotalAppropriations)
-
   return (
     <DefaultLayout title={props.title}>
       <div className='container mt-4'>
@@ -33,11 +31,11 @@ const ProjectType = (props) => {
                       <div className='card-body'>
                         <div className='title-heading'>Budget Line {_id}</div>
                         <div className='title-heading'>FMS Number {fmsNumber}</div>
-                        <h3 className='mb-4'>{toTitleCase(description)}</h3>
+                        <h5 className='mb-4'>{toTitleCase(description)}</h5>
                         <div className='row'>
                           <div className='col-6'>
                             <div className='total-container'>
-                              <h6>Total Appropriations</h6>
+                              <h6>FY08-FY22 Appropriations</h6>
                               <div className='big-money'>{formatMoney(totalAppropriations)}</div>
                             </div>
                           </div>

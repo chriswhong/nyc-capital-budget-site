@@ -132,6 +132,7 @@ a > .card:hover {
 }
 
 #tooltip {
+  display: none;
   position: absolute;
   background-color: #f2f2f2eb;
   padding: 6px 12px;
@@ -156,4 +157,8 @@ a > .card:hover {
 
 #tooltip hr {
   margin: 0;
+}
+
+.tooltip-line {
+  stroke-width: 3
 }

@@ -40,6 +40,10 @@
     "description": "Fire Department"
   },
   {
+    "type": "FT",
+    "description": "Franchise Transport"
+  },
+  {
     "type": "FA",
     "description": "Ferries and Aviation"
   },

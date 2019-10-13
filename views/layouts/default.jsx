@@ -12,7 +12,7 @@ class DefaultLayout extends React.Component {
         </head>
         <body>
           <nav className='navbar navbar-dark bg-dark'>
-            <a className='navbar-brand' href='#'>NYC Capital Commitments</a>
+            <a className='navbar-brand' href='#'>NYC Capital Budget</a>
             <form className='form-inline my-2 my-lg-0'>
               <input className='form-control mr-sm-2 search' type='search' placeholder='Search' aria-label='Search' />
             </form>

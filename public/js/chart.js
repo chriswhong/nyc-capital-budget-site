@@ -2,7 +2,7 @@
 // based on https://bl.ocks.org/gordlea/27370d1eea8464b04538e6d8ced39e89
 
 // all fys in our db plus 3 more years
-const fys = ['fy08', 'fy09', 'fy10', 'fy11', 'fy12', 'fy13', 'fy14', 'fy15', 'fy16', 'fy17', 'fy18', 'fy19', 'fy20', 'fy21', 'fy22']
+const fys = ['fy08', 'fy09', 'fy10', 'fy11', 'fy12', 'fy13', 'fy14', 'fy15', 'fy16', 'fy17', 'fy18', 'fy19', 'fy20', 'fy21', 'fy22', 'fy23']
 
 const formatCost = (number) => {
   return `$${d3.format('.3s')(number)}`
@@ -24,7 +24,7 @@ const getTypeLabel = (type) => {
 }
 
 const pad = (num, size) => {
-  const s = num + ''
+  let s = num + ''
   while (s.length < size) s = '0' + s
   return s
 }
@@ -46,6 +46,7 @@ const renderAvailableBalanceChart = (data) => {
 
   const renderTooltip = (year) => {
     const balances = availableBalance.find(d => d.asOf === year)
+    if (!balances) return
     const types = Object.keys(balances).filter(d => ['CN', 'CX', 'F', 'S', 'P'].includes(d))
     return `
       <div class='tiny'>Available at start of ${year.toUpperCase()}</div>
@@ -61,25 +62,39 @@ const renderAvailableBalanceChart = (data) => {
     `
   }
 
-  const drawTooltip = () => {
-    const year = xScale.invert(d3.mouse(tipBox.node())[0])
+  const bisectFy = d3.bisector((d) => { return d.asOf }).right
 
-    tooltipLine.attr('stroke', 'black')
+  const drawTooltip = () => {
+    // can't just inverse lookup the mouse position, there may not be data for that year
+    // pick the closest year
+    const mouseX = d3.mouse(tipBox.node())[0]
+    const year = xScale.invert(mouseX)
+    const i = bisectFy(availableBalance, year, 1)
+
+    // i is to the right of mouseX, i-1 is to the left.
+    // calculate distances to nearest values
+    const leftX = xScale(availableBalance[i - 1].asOf)
+    const rightX = xScale(availableBalance[i].asOf)
+    const distanceToLeft = mouseX - leftX
+    const distanceToRight = rightX - mouseX
+    const snapX = distanceToLeft < distanceToRight ? leftX : rightX
+
+    tooltipLine.attr('stroke', '#cdcdcd')
       .transition(d3.transition()
         .duration(100)
         .ease(d3.easeLinear)
       )
-      .attr('x1', xScale(year))
-      .attr('x2', xScale(year))
-      .attr('y1', 0)
-      .attr('y2', height)
+      .attr('x1', snapX)
+      .attr('x2', snapX)
+      .attr('y1', 0 - 10)
+      .attr('y2', height + 10)
 
     tooltip
       .style('display', 'block')
       .style('left', `${d3.event.offsetX + 50}px`)
       .style('top', `${d3.event.offsetY - 20}px`)
 
-    tooltip.html(renderTooltip(year))
+    tooltip.html(renderTooltip(xScale.invert(snapX)))
   }
 
   const availableBalance = data.map((budgetline) => {
@@ -146,7 +161,7 @@ const renderAvailableBalanceChart = (data) => {
     .append('g')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
 
-  const tooltipLine = svg.append('line')
+  const tooltipLine = svg.append('line').attr('class', 'tooltip-line')
 
   // 3. Call the x axis in a group tag
   svg.append('g')
@@ -182,18 +197,8 @@ const renderAvailableBalanceChart = (data) => {
     .on('mouseout', removeTooltip)
 }
 
-const renderCommitmentChart = (data) => {
-  const CONTAINER_SELECTOR = '#commitment-chart'
-
-  const availableBalance = data.map((budgetline) => {
-    const { asOf, city, nonCity, total } = budgetline.availableBalance
-    return {
-      asOf,
-      city,
-      nonCity,
-      total
-    }
-  })
+const renderAppropriationsChart = (data) => {
+  const CONTAINER_SELECTOR = '#appropriations-chart'
 
   const emptyFys = {}
   fys.slice().reverse().forEach((d) => { emptyFys[d] = 0 })
@@ -206,14 +211,24 @@ const renderCommitmentChart = (data) => {
   })
 
   // populate the empty fy objects with commitment data
-  data.forEach(({ fy, commitmentPlan }) => {
-    // for each of the 4 years in the commitmentPlan, set this fy as a key with $
-    commitmentPlan.forEach(({ city, nonCity }, i) => {
-      const thisFy = `fy${pad(parseInt(fy.split('fy')[1]) + i, 2)}`
-      const yearToSet = commitmentData.find(d => d.baseFy === thisFy)
-      yearToSet[fy] = city + nonCity
+  data.forEach((budgetline) => {
+    const { fy } = budgetline
+    const fys = ['fy0', 'fy1', 'fy2', 'fy3']
+    // for each of the 4 years of appropriations, set this fy as a key with $
+    fys.forEach((fyString, i) => {
+      const { CN, CX, F, S, P } = budgetline[fyString]
+      // calculate the actual fy from offsetFy
+      const fyToSet = `fy${pad(parseInt(fy.split('fy')[1]) + i, 2)}`
+      const types = [CN, CX, F, S, P]
+      const yearToSet = commitmentData.find(d => d.baseFy === fy)
+      const total = types.reduce((acc, type) => {
+        return type ? acc + type : acc
+      }, 0)
+      yearToSet[fyToSet] = total
     })
   })
+
+  console.log(commitmentData)
 
   const yearTotals = fys.map((fy) => {
     // sum all commitmentData for this fy
@@ -221,6 +236,8 @@ const renderCommitmentChart = (data) => {
       return acc + curr[fy]
     }, 0)
   })
+
+  console.log(yearTotals)
 
   const divWidth = d3.select(CONTAINER_SELECTOR).style('width').slice(0, -2)
   // 2. Use the margin convention practice
@@ -267,6 +284,7 @@ const renderCommitmentChart = (data) => {
     )// Create an axis component with d3.axisLeft
 
   const stacked = d3.stack().keys(fys)(commitmentData)
+  console.log(stacked)
 
   svg.selectAll('.serie')
     .data(stacked)
@@ -286,6 +304,7 @@ const budgetLineId = window.location.href.split('/')[6]
 
 d3.json(`/api/budgetline/${budgetLineId}`)
   .then((data) => {
+    console.log(data)
     renderAvailableBalanceChart(data)
-    // renderCommitmentChart(data)
+    renderAppropriationsChart(data)
   })

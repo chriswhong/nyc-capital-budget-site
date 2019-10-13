@@ -14,10 +14,11 @@ const Index = (props) => {
         <div className='row'>
           <div className='col-12'>
             <div className='jumbotron'>
-              <h1 className='display-4'>Explore the NYC Capital Commitment Plan</h1>
-              <p className='lead'>This is a civic tech project that seeks to demystify the New York City Capital Budget.  The Capital Commitment plan is a PDF document that outlines the how the city plans to spend capital money over the next 4 years.</p>
-              <p className='lead'>All data are from the <a href='https://www1.nyc.gov/site/omb/publications/fy19-accp.page'>FY 2019 Adopted Capital Commitment Plan</a></p>
+              <h1 className='display-4'>Explore the NYC Capital Budget</h1>
+              <p className='lead'>This is a civic tech project that seeks to visualize the New York City Capital Budget</p>
+              <p className='lead'>We currently show data from fiscal year 2008 through fiscal year 2020, obtained from <a href="https://www1.nyc.gov/site/omb/publications/publications.page">Office of Management and Budget (OMB) online publications</a>.</p>
               <hr className='my-4' />
+              <p>Capital funds are appropriated to budget lines.  All budget lines fall into one of 45 "project types".</p>
               <p>Click on a project type below to explore its associated budget lines and projects.</p>
             </div>
           </div>
@@ -29,9 +30,7 @@ const Index = (props) => {
                 description,
                 _id,
                 budgetLines,
-                projects,
                 totalAppropriations,
-                totalCommitments
               } = budgetType
               return (
                 <div key={_id} className='col-md-6'>
@@ -41,7 +40,6 @@ const Index = (props) => {
                         <h4 className='card-title'>{description}</h4>
                         <div className='mb-3'>
                           <div className='summary-info'><span className='badge badge-pill badge-secondary'>{budgetLines}</span> budget lines</div>
-                          <div className='summary-info'><span className='badge badge-pill badge-secondary'>{projects}</span> projects</div>
                         </div>
                         <div className='row'>
                           <div className='col-6'>
