@@ -7,7 +7,6 @@ const types = require('./utils/types')
 
 const lookupType = (type) => {
   const upperCaseType = type.toUpperCase()
-  console.log(type)
   return types.find(d => d.type === upperCaseType).description
 }
 
@@ -112,8 +111,6 @@ router.get('/', async (req, res, next) => {
       { $sort: { totalAppropriations: -1 } }
     ])
 
-    console.log(budgetTypes)
-
     budgetTypes = budgetTypes.map((budgetType) => {
 
       const description = lookupType(budgetType._id)
@@ -181,7 +178,6 @@ router.get('/api/budgetline/:id', async (req, res, next) => {
       .find({ id: id.toUpperCase() })
       .sort({ fy: 1 })
     const noProjects = data.map((budgetline) => {
-      console.log(budgetline)
       const {
         fy,
         id,
@@ -269,50 +265,50 @@ router.get('/search', async (req, res) => {
     .find({
       $or: [
         { description: queryRegex },
-        { budgetLineId: queryRegex }
+        { id: queryRegex }
       ]
-    }, 'budgetLineId description')
+    }, 'id description')
     .limit(20)
     .lean()
 
-  budgetLines = budgetLines.map(({ budgetLineId: id, description }) => ({
+  budgetLines = budgetLines.map(({ id, description }) => ({
     type: 'budgetLine',
     id,
     description,
-    url: `/fy19/type/${id.split('-')[0].toLowerCase()}/budgetline/${id.toLowerCase()}/${slugify(description, { lower: true })}`
+    url: `/type/${id.split('-')[0].toLowerCase()}/budgetline/${id.toLowerCase()}/${slugify(description, { lower: true })}`
   }))
 
-  let projects = await BudgetLine.aggregate([
-    { $unwind: '$projects' },
-    {
-      $match: {
-        $or: [
-          { 'projects.description': queryRegex },
-          { 'projects.id': queryRegex }
-        ]
-      }
-    },
-    {
-      $project: {
-        _id: 0,
-        budgetLineId: '$budgetLineId',
-        projectid: '$projects.id',
-        description: '$projects.description'
-      }
-    }
-  ])
-    .limit(20)
-
-  projects = projects.map(({ projectid: id, description, budgetLineId }) => ({
-    type: 'project',
-    id,
-    description,
-    url: `/fy19/type/${budgetLineId.split('-')[0].toLowerCase()}/budgetline/${budgetLineId.toLowerCase()}/project/${id.toLowerCase()}/${slugify(description, { lower: true })}`
-  }))
+  // let projects = await BudgetLine.aggregate([
+  //   { $unwind: '$projects' },
+  //   {
+  //     $match: {
+  //       $or: [
+  //         { 'projects.description': queryRegex },
+  //         { 'projects.id': queryRegex }
+  //       ]
+  //     }
+  //   },
+  //   {
+  //     $project: {
+  //       _id: 0,
+  //       budgetLineId: '$budgetLineId',
+  //       projectid: '$projects.id',
+  //       description: '$projects.description'
+  //     }
+  //   }
+  // ])
+  //   .limit(20)
+  //
+  // projects = projects.map(({ projectid: id, description, budgetLineId }) => ({
+  //   type: 'project',
+  //   id,
+  //   description,
+  //   url: `/fy19/type/${budgetLineId.split('-')[0].toLowerCase()}/budgetline/${budgetLineId.toLowerCase()}/project/${id.toLowerCase()}/${slugify(description, { lower: true })}`
+  // }))
 
   res.json([
     ...budgetLines,
-    ...projects
+    // ...projects
   ])
 })
 

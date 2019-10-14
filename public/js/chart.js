@@ -37,7 +37,7 @@ const checkForType = (data, key) => {
 
 const renderAvailableBalanceChart = (data) => {
   let tipBox // tooltips based on http://bl.ocks.org/wdickerson/64535aff478e8a9fd9d9facccfef8929
-  const tooltip = d3.select('#tooltip')
+  const tooltip = d3.select('#available-balance-tooltip')
 
   const removeTooltip = () => {
     if (tooltip) tooltip.style('display', 'none')
@@ -200,6 +200,37 @@ const renderAvailableBalanceChart = (data) => {
 const renderAppropriationsChart = (data) => {
   const CONTAINER_SELECTOR = '#appropriations-chart'
 
+  const tooltip = d3.select('#appropriations-tooltip')
+
+  const renderTooltip = (fy, d) => {
+    return `
+      <div class='tiny'>Appropriated in the ${fy} <br/>capital budget for use in ${d.data.fy}</div>
+      <div class='tooltip-items'>
+        <div class='tooltip-item total'>${formatCost(d.data[fy])}</div>
+      </div>
+    `
+  }
+
+  function removeTooltip () {
+    if (tooltip) tooltip.style('display', 'none')
+    d3.select(this)
+      .classed('highlight', false)
+  }
+
+  function drawTooltip (d) {
+    // get fy of this group (fy that money was appropriated)
+    const fy = d3.select(this.parentNode).attr('class').split(' ')[1]
+    d3.select(this)
+      .classed('highlight', true)
+
+    tooltip
+      .style('display', 'block')
+      .style('left', `${d3.event.offsetX + 50}px`)
+      .style('top', `${d3.event.offsetY - 20}px`)
+
+    tooltip.html(renderTooltip(fy, d))
+  }
+
   const emptyFys = {}
   fys.slice().reverse().forEach((d) => { emptyFys[d] = 0 })
   // make an object for each fy
@@ -228,18 +259,13 @@ const renderAppropriationsChart = (data) => {
     })
   })
 
-  console.log('ready to stack', commitmentData)
-
   const yearTotals = fys.map((fy) => {
     // sum all commitmentData for this fy
     const yearToSum = commitmentData.find(d => d.fy === fy)
     return Object.keys(yearToSum).reduce((acc, curr) => {
-      console.log(curr)
       return typeof yearToSum[curr] === 'number' ? acc + yearToSum[curr] : acc
     }, 0)
   })
-
-  console.log(yearTotals)
 
   const divWidth = d3.select(CONTAINER_SELECTOR).style('width').slice(0, -2)
   // 2. Use the margin convention practice
@@ -297,12 +323,11 @@ const renderAppropriationsChart = (data) => {
     )// Create an axis component with d3.axisLeft
 
   const stacked = d3.stack().keys(fys)(commitmentData)
-  console.log(stacked)
 
   svg.selectAll('.serie')
     .data(d3.stack().keys(fys)(commitmentData), d => d.key)
     .enter().append('g')
-    .attr('class', 'serie')
+    .attr('class', (d) => `serie ${d.key}`)
     .attr('fill', (d) => z(d.key))
     .selectAll('rect')
     .data(d => d)
@@ -311,6 +336,8 @@ const renderAppropriationsChart = (data) => {
     .attr('y', (d) => yScale(d[1]))
     .attr('height', (d) => yScale(d[0]) - yScale(d[1]))
     .attr('width', xScale.bandwidth())
+    .on('mousemove', drawTooltip)
+    .on('mouseout', removeTooltip)
 
   // bar labels
   svg.selectAll('.label')
@@ -332,7 +359,6 @@ const budgetLineId = window.location.href.split('/')[6]
 
 d3.json(`/api/budgetline/${budgetLineId}`)
   .then((data) => {
-    console.log(data)
     renderAvailableBalanceChart(data)
     renderAppropriationsChart(data)
   })

@@ -131,7 +131,7 @@ a > .card:hover {
   margin-right: 5px;
 }
 
-#tooltip {
+.chart-tooltip {
   display: none;
   position: absolute;
   background-color: #f2f2f2eb;
@@ -140,22 +140,22 @@ a > .card:hover {
   border: 3px solid #6c6c6c24;
 }
 
-#tooltip .tiny {
+.chart-tooltip .tiny {
   font-weight: 700;
   font-size: .6rem;
 }
 
-#tooltip .tooltip-item {
+.chart-tooltip .tooltip-item {
   text-align: right;
 }
 
-#tooltip .total {
+.chart-tooltip .total {
   text-align: center;
   font-size: 1.3rem;
   font-weight: 700;
 }
 
-#tooltip hr {
+.chart-tooltip hr {
   margin: 0;
 }
 
@@ -184,4 +184,9 @@ a > .card:hover {
 text.label {
   font-size: 0.6rem;
   fill: #4e4e4e;
+}
+
+rect.highlight {
+  stroke: #373737;
+  stroke-width: 3px;
 }

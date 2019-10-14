@@ -92,7 +92,7 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
           </div>
           <div className='col-12'>
             <div id='available-balance-chart' />
-            <div id='tooltip' />
+            <div id='available-balance-tooltip' className='chart-tooltip' />
           </div>
         </div>
         <hr />
@@ -104,7 +104,7 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
           <div className='col-12 d-flex appropriations-legend' />
           <div className='col-12'>
             <div id='appropriations-chart' />
-            <div id='tooltip' />
+            <div id='appropriations-tooltip' className='chart-tooltip' />
           </div>
         </div>
         <hr />
