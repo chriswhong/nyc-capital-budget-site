@@ -30,7 +30,7 @@ const Index = (props) => {
                 description,
                 _id,
                 budgetLines,
-                totalAppropriations,
+                totalAppropriations
               } = budgetType
               return (
                 <div key={_id} className='col-md-6'>
@@ -44,7 +44,7 @@ const Index = (props) => {
                         <div className='row'>
                           <div className='col-6'>
                             <div className='total-container'>
-                              <h6>FY08-FY22 Appropriations</h6>
+                              <h6>FY08-FY23 Appropriations</h6>
                               <div className='big-money'>{formatMoney(totalAppropriations)}</div>
                             </div>
                           </div>

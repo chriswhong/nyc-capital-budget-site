@@ -65,7 +65,7 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
         <div className='row'>
           <div className='col-6'>
             <div className='total-container'>
-              <h6>Total Appropriations</h6>
+              <h6>Total Appropriations FY08-FY23</h6>
               <div className='big-money'>{formatMoney(totalAppropriations)}</div>
             </div>
           </div>
@@ -81,7 +81,7 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
         <hr />
         <div className='row'>
           <div className='col-12 col-md-6'>
-            <h4>Available balance FY08-FY22</h4>
+            <h4>Available balance FY08-FY23</h4>
           </div>
           <div className='col-12 col-md-6 d-flex justify-content-end'>
             {
@@ -97,13 +97,11 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
         </div>
         <hr />
         <div className='row'>
-          <div className='col-12 col-md-6'>
-            <h4>Appropriations FY08-FY22</h4>
+          <div className='col-12'>
+            <h4>Appropriations FY08-FY23</h4>
             <p>Each year, money is appropriated to budget lines, and may be spread across the current fiscal year or any of the next three fiscal years.  This chart shows each year's appropriations combined with neighboring years</p>
           </div>
-          <div className='col-12 col-md-6 d-flex justify-content-end'>
-            Foo
-          </div>
+          <div className='col-12 d-flex appropriations-legend' />
           <div className='col-12'>
             <div id='appropriations-chart' />
             <div id='tooltip' />
@@ -112,6 +110,8 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
         <hr />
         <div className='row'>
           <div className='col-12'>
+            <h4>Capital Projects</h4>
+            <p>Coming Soon</p>
             {
               // projects.map((project) => {
               //   const { id, description, managingAgency } = project

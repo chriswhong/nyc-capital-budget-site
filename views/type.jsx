@@ -19,7 +19,7 @@ const ProjectType = (props) => {
           <div className='col-12'>
             <div className='title-heading'>Capital Project Type</div>
             <h1>{typeDisplay} ({type.toUpperCase()})</h1>
-            <p>From fy 2008 - fy 2022, {typeDisplay} consisted of {budgetLines.length} budget lines.  This type received {formatMoney(grandTotalAppropriations)} in new appropriations.</p>
+            <p>From fy 2008 - fy 2023, {typeDisplay} consisted of {budgetLines.length} budget lines.  This project type received {formatMoney(grandTotalAppropriations)} in appropriations.</p>
           </div>
           <div className='col-12'>
             {
@@ -35,13 +35,14 @@ const ProjectType = (props) => {
                         <div className='row'>
                           <div className='col-6'>
                             <div className='total-container'>
-                              <h6>FY08-FY22 Appropriations</h6>
+                              <h6>FY08-FY23 Appropriations</h6>
                               <div className='big-money'>{formatMoney(totalAppropriations)}</div>
                             </div>
                           </div>
                           <div className='col-6'>
                             <div className='total-container'>
                               <h6>Capital Projects</h6>
+                              <p>Coming Soon</p>
                               <div className='big-money'>{projects}</div>
                             </div>
                           </div>

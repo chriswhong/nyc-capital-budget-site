@@ -162,3 +162,26 @@ a > .card:hover {
 .tooltip-line {
   stroke-width: 3
 }
+
+.appropriations-legend-item {
+  padding: 0 5px;
+  font-size: 0.5rem;
+}
+
+.appropriations-legend-item .square {
+  background-color: #fca532;
+  height: 8px;
+  width: 8px;
+  display: inline-block;
+  margin-right: 2px;
+}
+
+  rect {
+  stroke: #c4c1c1;
+  stroke-width: 0.4;
+}
+
+text.label {
+  font-size: 0.6rem;
+  fill: #4e4e4e;
+}

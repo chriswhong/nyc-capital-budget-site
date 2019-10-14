@@ -24,7 +24,8 @@ class DefaultLayout extends React.Component {
             integrity='sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo='
             crossOrigin='anonymous'
           />
-          <script src='https://d3js.org/d3.v5.min.js' />
+          <script src='//d3js.org/d3.v5.min.js' />
+          <script src='/js/palette.js' />
           <script src='/js/search.js' />
           <script src='/js/chart.js' />
         </body>

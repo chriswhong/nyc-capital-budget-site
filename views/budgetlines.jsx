@@ -45,7 +45,7 @@ const BudgetLine = (props) => {
             <h5>{description}</h5>
             <p>Managed By: {agencyLookup(managingAgency)}</p>
             <p>Commitments: {commitmentCount}</p>
-            <p>Total FY19-FY22: {formatMoney(totalCommitments)}</p>
+            <p>Total FY19-FY23: {formatMoney(totalCommitments)}</p>
           </div>
         </div>
       </a>

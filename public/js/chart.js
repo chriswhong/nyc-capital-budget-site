@@ -1,4 +1,4 @@
-/* global d3 */
+/* global d3 palette */
 // based on https://bl.ocks.org/gordlea/27370d1eea8464b04538e6d8ced39e89
 
 // all fys in our db plus 3 more years
@@ -232,8 +232,10 @@ const renderAppropriationsChart = (data) => {
 
   const yearTotals = fys.map((fy) => {
     // sum all commitmentData for this fy
-    return commitmentData.reduce((acc, curr) => {
-      return curr[fy] ? acc + curr[fy] : acc
+    const yearToSum = commitmentData.find(d => d.fy === fy)
+    return Object.keys(yearToSum).reduce((acc, curr) => {
+      console.log(curr)
+      return typeof yearToSum[curr] === 'number' ? acc + yearToSum[curr] : acc
     }, 0)
   })
 
@@ -259,7 +261,18 @@ const renderAppropriationsChart = (data) => {
   // set the colors
   const z = d3.scaleOrdinal()
     .domain(fys)
-    .range(['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00'])
+    .range(palette('tol-sq', 16).map(d => `#${d}`))
+
+  // populate the legend
+  const legend = d3.select('.appropriations-legend')
+  legend.selectAll('.appropriations-legend-item')
+    .data(fys)
+    .enter()
+    .append('div')
+    .attr('class', 'appropriations-legend-item flex-fill')
+    .html(d => `
+      <p><div class='square' style='background-color: ${z(d)}'></div>${d}</p>
+    `)
 
   // 1. Add the SVG to the page and employ #2
   const svg = d3.select(CONTAINER_SELECTOR).append('svg')
@@ -290,14 +303,29 @@ const renderAppropriationsChart = (data) => {
     .data(d3.stack().keys(fys)(commitmentData), d => d.key)
     .enter().append('g')
     .attr('class', 'serie')
-    .attr('fill', function (d) { return z(d.key) })
+    .attr('fill', (d) => z(d.key))
     .selectAll('rect')
-    .data(function (d) { return d })
+    .data(d => d)
     .enter().append('rect')
-    .attr('x', function (d) { return xScale(d.data.fy) })
-    .attr('y', function (d) { return yScale(d[1]) })
-    .attr('height', function (d) { return yScale(d[0]) - yScale(d[1]) })
+    .attr('x', (d) => xScale(d.data.fy))
+    .attr('y', (d) => yScale(d[1]))
+    .attr('height', (d) => yScale(d[0]) - yScale(d[1]))
     .attr('width', xScale.bandwidth())
+
+  // bar labels
+  svg.selectAll('.label')
+    .data(fys.map((fy, i) => ({
+      fy,
+      total: yearTotals[i]
+    })))
+    .enter()
+    .append('text')
+    .attr('class', 'label')
+    .attr('text-anchor', 'middle')
+    .attr('x', (d) => xScale(d.fy) + (xScale.bandwidth() / 2))
+    .attr('y', (d) => yScale(d.total) - 11)
+    .attr('dy', '.75em')
+    .text((d) => formatCost(d.total))
 }
 
 const budgetLineId = window.location.href.split('/')[6]
