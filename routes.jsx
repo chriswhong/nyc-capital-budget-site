@@ -1,5 +1,6 @@
 const express = require('express')
 const BudgetLine = require('./models/budgetLine')
+const Commitments = require('./models/commitments')
 const router = express.Router()
 const slugify = require('slugify')
 
@@ -220,24 +221,81 @@ router.get('/type/:type/budgetline/:budgetlineid/:description', async (req, res,
         }
       }
     },
-    // { $unwind: '$projects' },
-    // {
-    //   $group: {
-    //     _id: '$projects.id',
-    //     projectDescription: { $first: '$projects.description' },
-    //     managingAgency: { $first: '$projects.managingAgency' },
-    //     budgetLineId: { $first: '$budgetLineId' },
-    //     description: { $first: '$description' },
-    //     fmsNumber: { $first: '$fmsNumber' },
-    //     totalAppropriations: { $first: '$totalAppropriations' }
-    //   }
-    // },
     {
       $group: {
         _id: '$id',
         description: { $first: '$description' },
         fmsNumber: { $first: '$fmsId' },
         totalAppropriations: { $sum: '$totalAppropriations' }
+      }
+    }
+  ])
+
+  const projects = await Commitments.aggregate([
+    {
+      $project: {
+        budgetLineId: '$budgetLineId',
+        description: '$description',
+        fmsNumber: '$fmsNumber',
+        projects: '$projects',
+        totalAppropriations: {
+          $reduce: {
+            input: {
+              $map: {
+                input: '$adoptedAppropriations',
+                in: { $sum: ['$$this.city', '$$this.nonCity'] }
+              }
+            },
+            initialValue: 0,
+            in: { $add: ['$$value', '$$this'] }
+          }
+        },
+        totalCommitments: {
+          $reduce: {
+            input: {
+              $map: {
+                input: '$commitmentPlan',
+                in: { $sum: ['$$this.city', '$$this.nonCity'] }
+              }
+            },
+            initialValue: 0,
+            in: { $add: ['$$value', '$$this'] }
+          }
+        }
+      }
+    },
+    {
+      $match: {
+        budgetLineId: {
+          $regex: new RegExp(`^${budgetlineid.toUpperCase()}`)
+        }
+      }
+    },
+    { $unwind: '$projects' },
+    {
+      $group: {
+        _id: '$projects.id',
+        projectDescription: { $first: '$projects.description' },
+        managingAgency: { $first: '$projects.managingAgency' },
+        budgetLineId: { $first: '$budgetLineId' },
+        description: { $first: '$description' },
+        fmsNumber: { $first: '$fmsNumber' },
+        totalAppropriations: { $first: '$totalAppropriations' }
+      }
+    },
+    {
+      $group: {
+        _id: '$budgetLineId',
+        description: { $first: '$description' },
+        fmsNumber: { $first: '$fmsNumber' },
+        totalAppropriations: { $first: '$totalAppropriations' },
+        projects: {
+          $push: {
+            id: '$_id',
+            description: '$projectDescription',
+            managingAgency: '$managingAgency'
+          }
+        }
       }
     }
     // {
@@ -254,7 +312,7 @@ router.get('/type/:type/budgetline/:budgetlineid/:description', async (req, res,
     // { $sort: { totalAppropriations: -1 } }
   ])
 
-  res.render('budgetlinetimeline', { title: 'Budget Line Timeline', budgetLine: budgetLines[0] })
+  res.render('budgetlinetimeline', { title: 'Budget Line Timeline', budgetLine: budgetLines[0], projects: projects[0].projects })
 })
 
 router.get('/search', async (req, res) => {

@@ -18,18 +18,4 @@ var budgetLineSchema = new Schema({
   estimatedDateOfCompletion: String
 }, { collection: 'capital-budget' })
 
-// Old Schema for Commitments
-// var budgetLineSchema = new Schema({
-//   fy: String,
-//   budgetLineId: String,
-//   fmsNumber: String,
-//   description: String,
-//   availableBalance: Object,
-//   contractLiability: Object,
-//   itdExpenditures: Object,
-//   adoptedAppropriations: Object,
-//   commitmentPlan: Object,
-//   projects: Array
-// }, { collection: 'multiyear' })
-
 module.exports = mongoose.model('BudgetLine', budgetLineSchema)

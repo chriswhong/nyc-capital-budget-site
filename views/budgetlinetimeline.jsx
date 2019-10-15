@@ -1,6 +1,6 @@
 const React = require('react')
 const DefaultLayout = require('./layouts/default')
-
+const { agencyLookup } = require('../utils/helpers')
 const { toTitleCase, formatMoney } = require('../utils/helpers')
 
 const LegendItem = ({ type, label }) => (
@@ -17,7 +17,8 @@ const LegendItem = ({ type, label }) => (
   </div>
 )
 
-const BudgetlineTimeline = ({ title, budgetLine }) => {
+const BudgetlineTimeline = ({ title, budgetLine, projects }) => {
+  console.log(projects)
   const {
     _id,
     fmsNumber,
@@ -69,14 +70,12 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
               <div className='big-money'>{formatMoney(totalAppropriations)}</div>
             </div>
           </div>
-          {
-            /* <div className='col-6'>
+          <div className='col-6'>
             <div className='total-container'>
               <h6>Capital Projects</h6>
               <div className='big-money'>{projects.length}</div>
             </div>
-          </div> */
-          }
+          </div>
         </div>
         <hr />
         <div className='row'>
@@ -113,18 +112,20 @@ const BudgetlineTimeline = ({ title, budgetLine }) => {
             <h4>Capital Projects</h4>
             <p>Coming Soon</p>
             {
-              // projects.map((project) => {
-              //   const { id, description, managingAgency } = project
-              //   return (
-              //     <div key={id} className='card mb-3'>
-              //       <div className='card-body'>
-              //         <div className='title-heading'>Project ID: {id}</div>
-              //         <div className='title-heading'>Managed By: {agencyLookup(managingAgency)}</div>
-              //         <h3 className='mb-4'>{toTitleCase(description)}</h3>
-              //       </div>
-              //     </div>
-              //   )
-              // })
+              projects.map((project) => {
+                const { id, description, managingAgency } = project
+                return (
+                  <div key={id} className='card mb-3'>
+                    <div className='card-body'>
+                      <div className='title-heading'>Project ID: {id}</div>
+                      <div className='title-heading'>Managed By: {agencyLookup(managingAgency)}</div>
+                      <h3 className='mb-4'>{toTitleCase(description)}</h3>
+                      <p>Let me know if there is a public source of information about how much we have spent on this capital project.</p>
+                      <p>You might be able to find some info at Checkbook NYC by doing an advanced search for capital project <strong>{managingAgency}{id}</strong></p>
+                    </div>
+                  </div>
+                )
+              })
             }
           </div>
         </div>
