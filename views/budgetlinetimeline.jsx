@@ -73,7 +73,7 @@ const BudgetlineTimeline = ({ title, budgetLine, projects }) => {
           <div className='col-6'>
             <div className='total-container'>
               <h6>Capital Projects</h6>
-              <div className='big-money'>{projects.length}</div>
+              <div className='big-money'>{(projects && projects.length) || 0}</div>
             </div>
           </div>
         </div>
@@ -112,7 +112,7 @@ const BudgetlineTimeline = ({ title, budgetLine, projects }) => {
             <h4>Capital Projects</h4>
             <p>Capital Projects associated with this budget line are listed in the Capital Commitment Plan, which is released each fall.  The document outlines planned expenditures over the current and next 3 fiscal years, but does not contain any information about expenditures.</p>
             {
-              projects.map((project) => {
+              projects && projects.map((project) => {
                 const { id, description, managingAgency } = project
                 return (
                   <div key={id} className='card mb-3'>

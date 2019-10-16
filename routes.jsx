@@ -312,7 +312,9 @@ router.get('/type/:type/budgetline/:budgetlineid/:description', async (req, res,
     // { $sort: { totalAppropriations: -1 } }
   ])
 
-  res.render('budgetlinetimeline', { title: 'Budget Line Timeline', budgetLine: budgetLines[0], projects: projects[0].projects })
+  console.log(projects)
+
+  res.render('budgetlinetimeline', { title: 'Budget Line Timeline', budgetLine: budgetLines[0], projects: projects[0] && projects[0].projects })
 })
 
 router.get('/search', async (req, res) => {
