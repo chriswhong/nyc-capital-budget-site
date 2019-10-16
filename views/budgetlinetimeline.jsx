@@ -110,7 +110,7 @@ const BudgetlineTimeline = ({ title, budgetLine, projects }) => {
         <div className='row'>
           <div className='col-12'>
             <h4>Capital Projects</h4>
-            <p>Coming Soon</p>
+            <p>Capital Projects associated with this budget line are listed in the Capital Commitment Plan, which is released each fall.  The document outlines planned expenditures over the current and next 3 fiscal years, but does not contain any information about expenditures.</p>
             {
               projects.map((project) => {
                 const { id, description, managingAgency } = project
@@ -120,8 +120,8 @@ const BudgetlineTimeline = ({ title, budgetLine, projects }) => {
                       <div className='title-heading'>Project ID: {id}</div>
                       <div className='title-heading'>Managed By: {agencyLookup(managingAgency)}</div>
                       <h3 className='mb-4'>{toTitleCase(description)}</h3>
-                      <p>Let me know if there is a public source of information about how much we have spent on this capital project.</p>
-                      <p>You might be able to find some info at Checkbook NYC by doing an advanced search for capital project <strong>{managingAgency}{id}</strong></p>
+                      <p>The only public records I'm aware of for expenditures at the capital project level are in <a href='https://www.checkbooknyc.com'>Checkbook NYC</a>.</p>
+                      <p><a href={`https://www.checkbooknyc.com/spending/search/transactions/captprj/${managingAgency}${id}`} target='_blank' rel='noopener noreferrer'>Search Checkbook NYC for transactions matching <strong>{managingAgency}{id}</strong></a></p>
                     </div>
                   </div>
                 )
