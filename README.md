@@ -45,3 +45,5 @@ While
 ## Contributing
 
 I'd love your help.  Contact me at @chris_whong on twitter, take a look at the open issues, and let me know what you'd like to work on.
+
+Chat with me and other contributors on [Gitter](https://gitter.im/nyc-budget-app/community)
