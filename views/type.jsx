@@ -24,14 +24,25 @@ const ProjectType = (props) => {
           <div className='col-12'>
             {
               budgetLines.map((budgetLine) => {
-                const { _id, fmsNumber, description, lowFy, highFy, projects, totalAppropriations } = budgetLine
+                const { _id, fmsNumber, description, lowFy, highFy, projects, totalAppropriations, geography } = budgetLine
                 return (
                   <a key={_id} href={`/type/${type}/budgetline/${_id.toLowerCase()}/${slugify(description, { lower: true })}`}>
                     <div key={_id} className='card mb-3'>
                       <div className='card-body'>
-                        <div className='title-heading'>Budget Line {_id}</div>
-                        <div className='title-heading'>FMS Number {fmsNumber}</div>
-                        <h5 className='mb-4'>{toTitleCase(description)}</h5>
+                        <div className='row'>
+                          <div className='col-6'>
+                            <div className='title-heading'>Budget Line {_id}</div>
+                            <div className='title-heading'>FMS Number {fmsNumber}</div>
+                          </div>
+                          <div className='col-6 text-right'>
+                            <div className={`badge badge-primary ${geography}`}>{geography}</div>
+                          </div>
+                        </div>
+                        <div className='row'>
+                          <div className='col-12'>
+                            <h2 className='mb-4'>{toTitleCase(description)}</h2>
+                          </div>
+                        </div>
                         <div className='row'>
                           <div className='col-6'>
                             <div className='total-container'>

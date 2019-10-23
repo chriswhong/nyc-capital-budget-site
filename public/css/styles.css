@@ -190,3 +190,23 @@ rect.highlight {
   stroke: #373737;
   stroke-width: 3px;
 }
+
+.citywide {
+  background-color: #000;
+}
+
+.manhattan {
+  background-color: #66c2a5;
+}
+
+.queens {
+  background-color: #fc8d62;
+}
+
+.bronx {
+  background-color: #e78ac3;
+}
+
+.staten {
+  background-color: #a6d854;
+}

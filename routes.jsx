@@ -155,13 +155,35 @@ router.get('/type/:type/:description', async (req, res, next) => {
           _id: '$budgetLineId',
           description: { $first: '$description' },
           fmsNumber: { $first: '$fmsNumber' },
+          geography: { $first: '$geography' },
           lowFy: { $min: '$fy' },
           highFy: { $max: '$fy' },
           totalAppropriations: { $sum: '$totalAppropriations' }
         }
       },
+      {
+        $lookup: {
+          from: 'geographic',
+          localField: '_id',
+          foreignField: 'id',
+          as: 'geography'
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          description: 1,
+          fmsNumber: 1,
+          geography: { $arrayElemAt: ['$geography.geography', 0] },
+          lowFy: 1,
+          highFy: 1,
+          totalAppropriations: 1
+        }
+      },
       { $sort: { totalAppropriations: -1 } }
     ])
+
+    console.log(budgetLines)
 
     res.render('type', {
       title: 'Project Types',
@@ -211,6 +233,7 @@ router.get('/type/:type/budgetline/:budgetlineid/:description', async (req, res,
         id: '$id',
         description: '$description',
         fmsId: '$fmsId',
+        geography: '$geography.geography',
         totalAppropriations: reduceTotalAppropriations
       }
     },
@@ -227,6 +250,23 @@ router.get('/type/:type/budgetline/:budgetlineid/:description', async (req, res,
         description: { $first: '$description' },
         fmsNumber: { $first: '$fmsId' },
         totalAppropriations: { $sum: '$totalAppropriations' }
+      }
+    },
+    {
+      $lookup: {
+        from: 'geographic',
+        localField: '_id',
+        foreignField: 'id',
+        as: 'geography'
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        description: 1,
+        fmsNumber: 1,
+        geography: { $arrayElemAt: ['$geography.geography', 0] },
+        totalAppropriations: 1
       }
     }
   ])
@@ -312,9 +352,13 @@ router.get('/type/:type/budgetline/:budgetlineid/:description', async (req, res,
     // { $sort: { totalAppropriations: -1 } }
   ])
 
-  console.log(projects)
+  console.log(budgetLines[0])
 
-  res.render('budgetlinetimeline', { title: 'Budget Line Timeline', budgetLine: budgetLines[0], projects: projects[0] && projects[0].projects })
+  res.render('budgetlinetimeline', {
+    title: 'Budget Line Timeline',
+    budgetLine: budgetLines[0],
+    projects: projects[0] && projects[0].projects
+  })
 })
 
 router.get('/search', async (req, res) => {
@@ -338,37 +382,37 @@ router.get('/search', async (req, res) => {
     url: `/type/${id.split('-')[0].toLowerCase()}/budgetline/${id.toLowerCase()}/${slugify(description, { lower: true })}`
   }))
 
-  // let projects = await BudgetLine.aggregate([
-  //   { $unwind: '$projects' },
-  //   {
-  //     $match: {
-  //       $or: [
-  //         { 'projects.description': queryRegex },
-  //         { 'projects.id': queryRegex }
-  //       ]
-  //     }
-  //   },
-  //   {
-  //     $project: {
-  //       _id: 0,
-  //       budgetLineId: '$budgetLineId',
-  //       projectid: '$projects.id',
-  //       description: '$projects.description'
-  //     }
-  //   }
-  // ])
-  //   .limit(20)
-  //
-  // projects = projects.map(({ projectid: id, description, budgetLineId }) => ({
-  //   type: 'project',
-  //   id,
-  //   description,
-  //   url: `/fy19/type/${budgetLineId.split('-')[0].toLowerCase()}/budgetline/${budgetLineId.toLowerCase()}/project/${id.toLowerCase()}/${slugify(description, { lower: true })}`
-  // }))
+  let projects = await Commitments.aggregate([
+    { $unwind: '$projects' },
+    {
+      $match: {
+        $or: [
+          { 'projects.description': queryRegex },
+          { 'projects.id': queryRegex }
+        ]
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        budgetLineId: '$budgetLineId',
+        projectid: '$projects.id',
+        description: '$projects.description'
+      }
+    }
+  ])
+    .limit(20)
+
+  projects = projects.map(({ projectid: id, description, budgetLineId }) => ({
+    type: 'project',
+    id,
+    description,
+    url: `/type/${budgetLineId.split('-')[0].toLowerCase()}/budgetline/${budgetLineId.toLowerCase()}/${slugify(description, { lower: true })}`
+  }))
 
   res.json([
     ...budgetLines,
-    // ...projects
+    ...projects
   ])
 })
 

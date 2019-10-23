@@ -18,12 +18,12 @@ const LegendItem = ({ type, label }) => (
 )
 
 const BudgetlineTimeline = ({ title, budgetLine, projects }) => {
-  console.log(projects)
   const {
     _id,
     fmsNumber,
     description,
-    totalAppropriations
+    totalAppropriations,
+    geography
   } = budgetLine
 
   const legendItems = [
@@ -57,9 +57,16 @@ const BudgetlineTimeline = ({ title, budgetLine, projects }) => {
     <DefaultLayout title={title}>
       <div className='container mt-4'>
         <div className='row'>
-          <div className='col-12'>
+          <div className='col-6'>
             <div className='title-heading'>Budget Line {_id}</div>
             <div className='title-heading'>FMS Number {fmsNumber}</div>
+          </div>
+          <div className='col-6 text-right'>
+            <div className={`badge badge-primary ${geography}`}>{geography}</div>
+          </div>
+        </div>
+        <div className='row'>
+          <div className='col-12'>
             <h2 className='mb-4'>{toTitleCase(description)}</h2>
           </div>
         </div>
